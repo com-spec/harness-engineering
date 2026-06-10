@@ -37,6 +37,7 @@ This establishes the basic manual method. Script sync-agents.sh now available in
   - lecture-completion: 欠落5講（06,07,09,10,11）を日本語要約で補完、全12講収録完了（1237882）
   - agents-md-quality: docs/agents-md-gap-analysis.md に差分分析8項目を記録、AGENTS.md にスコープ規律・完了の定義・検証レベル・標準検証コマンド・セッション終了手順を追加、sync-agents.sh で同期
   - Web取得・docs/templates 作成は general-purpose サブエージェントに委譲（コンテキスト保護）
+  - lecture-japanese-translation: ユーザー追加依頼により、英語原文のままだった既存8講（00-05, 08, 12）を詳細な日本語版に書き換え。全13ファイルが日本語化完了（原文は 1d5c22c で参照可能）
 - Verification run: feature_list.json を json.tool で構文検証。ls で全12講と templates/ 4ファイルの存在確認。tail で出典URL確認。sync-agents.sh の diff 検証成功。git log でコミット履歴確認。
 - Evidence captured: feature_list.json の各 evidence 配列に記録済み。quality-document.md に初回品質スナップショット。
 - Commits: 1d5c22c, c81d608, cec2706, 2ec4905, 1237882, ほか本セッション終了コミット（ユーザー承認のコミット運用に基づく）

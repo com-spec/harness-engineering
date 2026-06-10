@@ -1,100 +1,102 @@
-[中文版 →](https://walkinglabs.github.io/learn-harness-engineering/zh/lectures/lecture-04-why-one-giant-instruction-file-fails/)
+# Lecture 04: なぜ1つの巨大な指示ファイルは失敗するのか
 
-> Code examples: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-04-why-one-giant-instruction-file-fails/code/) Practice project: [Project 02. Agent-readable workspace](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-02-agent-readable-workspace/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-04-why-one-giant-instruction-file-fails/code/) 実践プロジェクト: [Project 02. Agent-readable workspace](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-02-agent-readable-workspace/)
 
-You started taking harness engineering seriously — good. You created an `AGENTS.md` and packed in every rule, constraint, and lesson learned you could think of. One month later the file had ballooned to 300 lines, two months 450, three months 600. Then you notice the agent's performance is actually getting worse: on a simple bug fix, the agent burns through huge amounts of context processing irrelevant deployment instructions; a critical security constraint buried at line 300 gets ignored outright; three contradictory code style rules mean the agent picks one at random each time.
+ハーネスエンジニアリングに本腰を入れ、AGENTS.md を作って思いつく限りのルール・制約・教訓を詰め込んだとする。1ヶ月後にファイルは300行、2ヶ月で450行、3ヶ月で600行に膨れる。するとエージェントの性能はむしろ悪化し始める。単純なバグ修正なのに無関係なデプロイ手順の処理に大量のコンテキストを消費し、300行目に埋まった重要なセキュリティ制約は無視され、矛盾する3つのコードスタイルルールから毎回ランダムに1つが選ばれる。
 
-This is the "giant instruction file" trap. Everything seems useful, so you cram it all in, and finding one specific rule means rifling through the entire file. You wrote 600 lines, but only a third of it is relevant to the task at hand.
+これが「巨大指示ファイル」の罠である。何でも有用そうだから全部詰め込み、1つのルールを探すにはファイル全体をかき回すことになる。600行書いても、目の前のタスクに関係するのは3分の1だけ。
 
-## The Vicious Cycle at the Root
+結論: 入口ファイルは50〜200行のルーター（道案内役）にとどめ、詳細はトピック別ドキュメントに分割して必要時に読ませる。
 
-The most common vicious cycle goes like this: the agent makes a mistake, you say "add a rule to prevent this," you add it to AGENTS.md, and it works — temporarily. Then the agent makes a different mistake, so you add another rule. Repeat until the file bloats out of control.
+## 根本にある悪循環
 
-This is a perfectly natural reaction. "Add a rule" every time something goes wrong feels reasonable. But the cumulative effect is disastrous. Let's look at exactly what goes wrong.
+最もよくある悪循環はこうだ。エージェントがミスをする→「再発防止のルールを足そう」→ AGENTS.md に追記→一時的には効く→別のミスが起きる→またルールを足す→ファイルが制御不能に膨張。
 
-**Context budget gets eaten alive.** The agent's context window is finite. Say your agent has a 200K token window (Claude's standard). A bloated instruction file might consume 10-20K tokens. Seems like there's still plenty of headroom? But a complex task might need to read dozens of source files, tool execution output also takes up context, and conversation history keeps accumulating. By the time the agent actually needs to understand the code, the budget is already exhausted.
+「問題が起きたらルールを足す」は自然な反応だが、累積効果は破滅的である。具体的に何が起きるか:
 
-**Lost in the middle.** The "Lost in the Middle" paper (Liu et al., 2023) clearly demonstrated that LLMs utilize information in the middle of long texts significantly less effectively than at the beginning or end. Your AGENTS.md is 600 lines long, and line 300 says "all database queries must use parameterized queries" — that's a security hard constraint. But it's buried in the middle, and the agent will almost certainly ignore it.
+- **コンテキスト予算が食い潰される**: エージェントのコンテキストウィンドウは有限。200Kトークン（Claudeの標準）でも、肥大した指示ファイルが10〜20Kトークンを消費する。まだ余裕があるように見えるが、複雑なタスクでは数十のソースファイルを読み、ツール出力もコンテキストを使い、会話履歴も積み上がる。エージェントが実際にコードを理解すべき段階で、予算はすでに枯渇している
+- **Lost in the Middle（中間の喪失）**: Liu らの2023年の論文が明確に示した通り、LLMは長文の中間にある情報を、冒頭や末尾に比べて著しく活用できない。600行の AGENTS.md の300行目に「全DBクエリはパラメータ化クエリ必須」というセキュリティのハード制約があっても、中間に埋もれているためほぼ確実に無視される
+- **優先度の衝突**: ファイルの中で、譲れないハード制約（「eval() を絶対使うな」）、重要な設計指針（「関数型スタイルを推奨」）、特定の歴史的教訓（「先週WebSocketのメモリリークを直した、類似パターンに注意」）が混在する。重要度がまったく違う3種のルールが、ファイル上では同じ見た目をしている。どれがレッドラインでどれが単なる提案か、エージェントには区別する信頼できるシグナルがない
+- **メンテナンスの腐敗**: 大きなファイルは本質的に保守しにくい。古い指示は消されにくい（「他の何かがこのルールに依存しているかも？」と削除の影響が読めない）一方、新しい指示の追加はコストゼロに感じる。結果、ファイルは増える一方で減らず、S/N比（信号対雑音比）が下がり続ける。ソフトウェアの技術的負債の蓄積と同じ問題
+- **矛盾の蓄積**: 別々の時期に追加された指示が矛盾し始める——「TypeScript strict モードを使え」と「一部レガシーファイルは any 許可」。エージェントは毎回ランダムにどちらかを選ぶ
 
-**Priority conflicts.** The file mixes non-negotiable hard constraints ("never use eval()"), important design guidelines ("prefer functional style"), and a specific historical lesson ("fixed a WebSocket memory leak last week, watch for similar patterns"). These three rules have completely different importance levels, but in the file they all look identical. The agent has no reliable signal to distinguish which is a red line and which is merely a suggestion.
+## 核心概念
 
-**Maintenance decay.** Large files are inherently hard to maintain. Outdated instructions rarely get deleted, because the consequences of deletion are uncertain ("maybe something else depends on this rule?"), but adding new instructions feels cost-free. The result: the file only grows, never shrinks, and the signal-to-noise ratio steadily declines. This is the same problem as technical debt accumulation in software.
+- **指示の肥大化（Instruction Bloat）**: 指示ファイルがコンテキストウィンドウの10〜15%を占めると、コード読解とタスク推論の予算を圧迫し始める。600行の AGENTS.md は10,000〜20,000トークン——128Kウィンドウの8〜15%
+- **Lost in the Middle**: 長文の中間にある情報は見落とされやすい。Liu ら（2023）の研究で、LLMは長文中間の情報活用が冒頭・末尾より著しく劣ると示された。600行のファイルの300行目に埋まった重要制約は高確率で無視される
+- **指示のS/N比（SNR）**: ファイル内の指示のうち現在のタスクに関係する割合。バグ修正中に50行のデプロイ手順を読まされる——それが低S/N比
+- **入口ファイル（Entry File）**: 詳細ドキュメントへエージェントを導くための短い入口。それ自体が全部を含むのではない。50〜200行で十分
+- **必要時開示（Reveal on Demand）**: まず概要を渡し、詳細は必要になったときに渡す。良いハーネス設計は良いUI設計に似ている——全オプションを一度にユーザーへ投げつけない
+- **重要度の判別不能（Can't Tell What Matters）**: すべての指示が同じ形式・同じ場所に現れると、エージェントは譲れないハード制約と提案レベルのソフト指針を区別できない
 
-**Contradiction accumulation.** Instructions added at different times start contradicting each other — one says "use TypeScript strict mode," another says "some legacy files are allowed to use any." The agent picks one at random each time.
+## 指示アーキテクチャ: どう分割するか
 
-## Core Concepts
+中核原則: 頻繁に必要な情報は手元に、たまに必要な情報はしまっておき、使わないものは持ち歩かない。
 
-- **Instruction Bloat**: When an instruction file occupies 10-15% of the context window, it starts crowding out budget for code reading and task reasoning. A 600-line `AGENTS.md` might consume 10,000-20,000 tokens — that's 8-15% of a 128K window.
-- **Lost in the Middle**: Information in the middle of long texts is easily overlooked. Liu et al.'s 2023 research showed that LLMs utilize information in the middle of long texts significantly less effectively than information at the beginning or end. A critical constraint buried at line 300 of a 600-line file has a very high probability of being ignored.
-- **Instruction Signal-to-Noise Ratio (SNR)**: The proportion of instructions in a file that are relevant to the current task. Being forced to read 50 lines of deployment instructions during a bug fix — that's low SNR.
-- **Entry File**: A short entry file whose purpose is to guide the agent toward more detailed documentation, rather than containing everything itself. 50-200 lines is sufficient.
-- **Reveal on Demand**: Give overview information first, detailed information when needed. Good harness design is like good UI design — don't dump all options on the user at once.
-- **Can't Tell What Matters**: When all instructions appear in the same format and location, the agent cannot distinguish non-negotiable hard constraints from suggestive soft guidelines.
-
-## Instruction Architecture
-
-## How to Split
-
-Core principle: keep frequently-needed information at hand, tuck away occasionally-needed information, and don't carry what you'll never use.
-
-The entry file `AGENTS.md` stays at 50-200 lines, containing only the most essential items: a project overview (one or two sentences that make it clear what this is), first-run commands (`make setup && make test`), global hard constraints (no more than 15 non-negotiable rules), and links to topic documents (one-line description plus applicability condition).
+入口ファイル AGENTS.md は50〜200行に保ち、最重要項目だけを含める: プロジェクト概要（何のプロジェクトか分かる1〜2文）、初回実行コマンド（`make setup && make test`）、グローバルなハード制約（譲れないルール15個以内）、トピックドキュメントへのリンク（1行説明と適用条件付き）。
 
 ```markdown
 # AGENTS.md
 
-## Project Overview
-Python 3.11 FastAPI backend, PostgreSQL 15 database.
+## プロジェクト概要
+Python 3.11 FastAPI バックエンド、PostgreSQL 15 データベース。
 
-## Quick Start
-- Install: \`make setup\`
-- Test: \`make test\`
-- Full verification: \`make check\`
+## クイックスタート
+- インストール: `make setup`
+- テスト: `make test`
+- フル検証: `make check`
 
-## Hard Constraints
-- All APIs must use OAuth 2.0 authentication
-- All database queries must use SQLAlchemy 2.0 syntax
-- All PRs must pass pytest + mypy --strict + ruff check
+## ハード制約
+- 全APIは OAuth 2.0 認証必須
+- 全DBクエリは SQLAlchemy 2.0 構文必須
+- 全PRは pytest + mypy --strict + ruff check 合格必須
 
-## Topic Docs
-- API Design Patterns (\`docs/api-patterns.md\`) — Required reading when adding endpoints
-- Database Rules (\`docs/database-rules.md\`) — Required when modifying database operations
-- Testing Standards (\`docs/testing-standards.md\`) — Reference when writing tests
+## トピックドキュメント
+- API設計パターン（`docs/api-patterns.md`）— エンドポイント追加時に必読
+- データベースルール（`docs/database-rules.md`）— DB操作の変更時に必読
+- テスト標準（`docs/testing-standards.md`）— テスト作成時に参照
 ```
 
-Each topic document is 50-150 lines, organized by subject in the `docs/` directory or next to the corresponding module. The agent only reads them when needed. Think of it like packing cubes for your luggage — underwear in one cube, toiletries in another, chargers in a third. Finding what you need doesn't require emptying the entire bag.
+各トピックドキュメントは50〜150行とし、`docs/` ディレクトリまたは対応モジュールの隣に主題別に整理する。エージェントは必要なときだけ読む。旅行用パッキングキューブのイメージ——下着は1つのキューブ、洗面用具は別のキューブ、充電器はまた別。必要なものを探すのにバッグ全体をひっくり返さなくていい。
 
-Some information is better placed directly in the code — type definitions, interface comments, explanations in config files. The agent naturally sees these when reading code, so there's no need to duplicate them in instructions.
+一部の情報はコードに直接置くほうがよい——型定義、インターフェースのコメント、設定ファイル内の説明。エージェントはコードを読むとき自然にこれらを目にするので、指示ファイルへの重複記載は不要。
 
-Every instruction should document its source ("why was this rule added?"), applicability condition ("when is this rule needed?"), and expiry condition ("under what circumstances can this rule be removed?"). Audit regularly and delete outdated, redundant, or contradictory entries. Manage your instructions the way you manage code dependencies — unused dependencies should be removed, otherwise they only slow the system down.
+すべての指示には、出所（なぜこのルールを追加したか）、適用条件（いつ必要か）、失効条件（どうなったら削除できるか）を記録する。定期監査で陳腐化・冗長・矛盾したエントリを削除する。コードの依存パッケージ管理と同じ要領——使っていない依存は外す。残せばシステムを遅くするだけ。
 
-If an instruction absolutely must be in the entry file, put it at the top or bottom, never in the middle. The "lost in the middle" effect tells us that LLMs utilize information at the extremes of a long text significantly better than in the center. But the better approach is to move instructions into topic documents for on-demand loading.
+どうしても入口ファイルに置くべき指示は、冒頭か末尾に置き、中間には絶対置かない。Lost in the Middle 効果の通り、長文の両端の情報活用度は中央より大幅に高い。ただしより良いのは、トピックドキュメントへ移して必要時に読み込ませることである。
 
-Both OpenAI and Anthropic implicitly endorse this split approach. OpenAI says entry files should be "short and routing-oriented," while Anthropic says control information for long-running agents should be "concise and high-priority." Both are saying the same thing: don't stuff everything into a single file.
+OpenAIもAnthropicもこの分割アプローチを支持している。OpenAIは入口ファイルを「短くルーティング指向に」と言い、Anthropicは長時間実行エージェントの制御情報を「簡潔かつ高優先度に」と言う。どちらも同じこと——1ファイルに全部詰め込むな。
 
-## Real-World Example
+## 実例
 
-A SaaS team's `AGENTS.md` ballooned from 50 lines to 600. The contents mixed together tech stack versions, coding standards, historical bug fix notes, API usage guides, deployment procedures, and team members' personal preferences — everything was in there, but finding the part relevant to the current task was a slog.
+あるSaaSチームの AGENTS.md が50行から600行に膨張した。中身は技術スタックのバージョン・コーディング標準・過去のバグ修正メモ・API利用ガイド・デプロイ手順・メンバーの個人的好みがごちゃ混ぜで、現在のタスクに関係する部分を探すのが一苦労だった。
 
-Agent performance started declining noticeably: during simple bug fixes the agent spent significant context processing irrelevant deployment instructions; the security constraint "all database queries must use parameterized queries" was buried at line 300 and frequently ignored; three contradictory code style rules caused the agent to pick one at random.
+エージェントの性能低下は顕著だった: 単純なバグ修正で無関係なデプロイ手順の処理にコンテキストを浪費、300行目に埋まった「全DBクエリはパラメータ化クエリ必須」というセキュリティ制約は頻繁に無視、矛盾する3つのコードスタイルルールからランダム選択。
 
-The team executed a split refactoring:
+チームが実行した分割リファクタリング:
 
-1. `AGENTS.md` trimmed to 80 lines: only project overview, run commands, and 15 global hard constraints
-2. Created topic documents: `docs/api-patterns.md` (120 lines), `docs/database-rules.md` (60 lines), `docs/testing-standards.md` (80 lines)
-3. Added topic document links in the entry file
-4. Historical notes either converted to test cases or deleted outright
+1. AGENTS.md を80行に削減: プロジェクト概要・実行コマンド・グローバルハード制約15個のみ
+2. トピックドキュメントを作成: `docs/api-patterns.md`（120行）、`docs/database-rules.md`（60行）、`docs/testing-standards.md`（80行）
+3. 入口ファイルにトピックドキュメントへのリンクを追加
+4. 過去のメモはテストケースに変換するか、即削除
 
-After refactoring: success rate on the same task set improved from 45% to 72%. Security constraint compliance rose from 60% to 95%, because the rule moved from the middle of the file to the top of the entry file — no longer "lost in the middle."
+リファクタリング後: 同じタスクセットでの成功率が45%から72%に改善。セキュリティ制約の遵守率は60%から95%に上昇——ルールがファイル中間から入口ファイル冒頭に移り、「中間で迷子」にならなくなったためである。
 
-## Key Takeaways
+## 要点
 
-- "Add a rule" is short-term pain relief and long-term poison. Before adding any rule, consider whether it belongs in a topic document instead.
-- The entry file is a router, not an encyclopedia. 50-200 lines — overview, hard constraints, and links only.
-- Leverage the "lost in the middle" effect: put important information at the top or bottom, and move less critical items to topic documents.
-- Manage instruction bloat the way you manage technical debt. Regular audits, and every instruction should have a source, applicability condition, and expiry condition.
-- After splitting, SNR improves and the agent spends more of its context budget on the actual task instead of processing irrelevant instructions.
+- 「ルールを足す」は短期の鎮痛剤で長期の毒。ルールを足す前に、それはトピックドキュメント行きではないかを考える
+- 入口ファイルは百科事典ではなくルーター。50〜200行——概要・ハード制約・リンクのみ
+- Lost in the Middle 効果を逆手に取る: 重要情報は冒頭か末尾、重要度の低い項目はトピックドキュメントへ
+- 指示の肥大化は技術的負債と同じように管理する。定期監査し、各指示に出所・適用条件・失効条件を持たせる
+- 分割後はS/N比が上がり、エージェントはコンテキスト予算を無関係な指示の処理ではなく本来のタスクに使えるようになる
 
-## Further Reading
+## 演習
+
+1. **S/N比監査**: 現在の入口指示ファイルの全指示エントリをリスト化する。よくあるタスクタイプを5つ選び、各指示がそのタスクに関係するかをマークし、タスクタイプごとのS/N比を計算する。大半のタスクでノイズになる指示はトピックドキュメントへ移す
+2. **必要時開示リファクタリング**: 300行超の指示ファイルがあれば、(a) 100行未満の入口ファイル、(b) 3〜5個のトピックドキュメントに分割する。リファクタリング前後で同じタスクセット（5件以上）を実行し、成功率を比較する
+3. **Lost in the Middle 検証**: 長い指示ファイルで、重要な制約を冒頭・中間・末尾にそれぞれ配置し、同じタスクセットを実行（各位置で5回以上）。遵守率の差を見る。位置効果の強さに驚くかもしれない
+
+## 参考文献
 
 - [OpenAI: Harness Engineering](https://openai.com/index/harness-engineering/)
 - [Anthropic: Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
@@ -102,8 +104,6 @@ After refactoring: success rate on the same task set improved from 45% to 72%. S
 - [HumanLayer: Harness Engineering for Coding Agents](https://humanlayer.dev/articles/harness-engineering-for-coding-agents/)
 - [Nielsen Norman Group: Progressive Disclosure](https://www.nngroup.com/articles/progressive-disclosure/)
 
-## Exercises
+---
 
-1. **SNR Audit**: Take your current entry instruction file and list all instruction entries. Pick 5 different common task types and mark whether each instruction is relevant to that task. Calculate the SNR for each task type. Instructions that are noise for most tasks should be moved to topic documents.
-2. **Reveal on Demand Refactor**: If you have an instruction file over 300 lines, split it into: (a) an entry file under 100 lines, (b) 3-5 topic documents. Run the same set of tasks (at least 5) before and after refactoring, and compare success rates.
-3. **Lost in the Middle Verification**: In a long instruction file, place a critical constraint at the top, middle, and bottom respectively, running the same task set each time (at least 5 runs per position). See if there's a difference in compliance rate. You might be surprised by how strong the position effect is.
+出典: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-04-why-one-giant-instruction-file-fails/

@@ -1,165 +1,169 @@
-[中文版 →](https://walkinglabs.github.io/learn-harness-engineering/zh/lectures/lecture-12-why-every-session-must-leave-a-clean-state/)
+# Lecture 12: なぜすべてのセッションはクリーンな状態を残さなければいけないのか
 
-> Code examples: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/code/) Practice project: [Project 06. Build a Complete Agent Workspace](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/code/) 実践プロジェクト: [Project 06. Build a Complete Agent Workspace](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/)
 
-Your agent runs all afternoon, modifies 20 files, commits the code, and the session ends. The next agent session starts up and immediately discovers: build is broken, tests are red, temporary debug files are scattered everywhere, the feature list hasn't been updated, and progress is completely opaque. The first 30 minutes of the new session are spent entirely on "figuring out what the last session actually did."
+エージェントが午後いっぱい動き、20ファイルを修正してコミットし、セッションが終わる。次のエージェントセッションが立ち上がると即座に発覚する: ビルドが壊れ、テストは赤、一時的なデバッグファイルが散乱し、feature list は未更新で、進捗はまったく不透明。新セッションの最初の30分は「前セッションが実際に何をしたのかの解明」に丸ごと消える。
 
-Both OpenAI and Anthropic state clearly: **long-term reliability depends on operational discipline, not just single-run success.** The quality of state at the end of each session directly determines the next session's efficiency.
+OpenAIもAnthropicも明言している: **長期的な信頼性は、単発の成功ではなく運用上の規律（operational discipline）に依存する。** 各セッション終了時の状態の品質が、次セッションの効率を直接決める。
 
-## Entropy Growth Is the Default State
+結論: 「セッション完了 = タスクの検証合格 かつ クリーンな状態チェックの合格」と定義する。クリーンな状態は任意の片付けではなく、完了の定義の一部である。
 
-Lehman's laws of software evolution tell us that systems undergoing continuous change will inevitably grow more complex unless actively managed. This is especially true for AI coding agents. Every session introduces changes, and without cleanup at exit, technical debt accumulates exponentially.
+## エントロピー増大がデフォルト状態
 
-During five months of Codex experiments, OpenAI observed something striking: **agents copy patterns already present in the repository, even when those patterns are inconsistent or suboptimal.** Over time, this copying inevitably leads to drift. The first person leaves a coffee cup in the common area; the second person figures "it's already messy" and leaves another; a week later the table is buried under cups. A codebase works the same way.
+Lehmanのソフトウェア進化の法則（継続的に変更されるシステムは、積極的に管理しない限り必ず複雑化するという経験則）は、AIコーディングエージェントに特によく当てはまる。すべてのセッションは変更を持ち込み、終了時の片付けがなければ技術的負債は指数関数的に蓄積する。
 
-The OpenAI team initially spent 20% of every Friday manually cleaning up "AI slop," but this approach clearly doesn't scale. They eventually arrived at a systematic solution:
+OpenAIは5ヶ月のCodex実験で印象的な現象を観測した: **エージェントはリポジトリに既に存在するパターンを、それが一貫していなくても最適でなくても、コピーする。** 時間とともにこのコピーは必然的にドリフト（劣化方向へのずれ）を生む。共用スペースに最初の1人がコーヒーカップを置き忘れる。2人目は「もう散らかってるし」ともう1つ置く。1週間後、テーブルはカップに埋もれる。コードベースも同じである。
 
-1. **Encode "golden rules" into the repository**: Rules like "prefer the shared utility package over hand-rolled ad-hoc helpers" (keep invariants centralized) and "don't YOLO-guess data structures" (validate boundaries or depend on typed SDKs). These rules are concrete, mechanical, and automatically checkable.
-2. **Establish periodic cleanup workflows**: A fleet of background Codex tasks that regularly scan for deviations, update quality scores, and open targeted refactoring PRs. Most can be reviewed and auto-merged within a minute.
-3. **Capture human taste once, enforce it continuously**: Review comments, refactoring PRs, and user-facing bugs are all translated into documentation updates or encoded directly into tooling. When documentation isn't enough, promote the rule into code.
+OpenAIチームは当初、毎週金曜の20%を「AIの残骸（AI slop）」の手作業掃除に充てていたが、これは明らかにスケールしない。最終的に到達した体系的な解決策:
 
-Technical debt is a high-interest loan. Continuously paying it off in small increments is almost always better than letting it accumulate into one massive payoff event.
+1. **「黄金律」をリポジトリにエンコードする**: 「自前のアドホックなヘルパーより共有ユーティリティパッケージを使え」（不変条件を一箇所に集中）、「データ構造をヤマ勘で推測するな」（境界で検証するか型付きSDKに依存する）といったルール。具体的・機械的・自動チェック可能であること
+2. **定期クリーンアップのワークフローを確立する**: バックグラウンドのCodexタスク群が定期的に逸脱をスキャンし、品質スコアを更新し、対象を絞ったリファクタリングPRを開く。大半は1分以内にレビューして自動マージできる
+3. **人間の好みは一度だけ捕捉し、以後は継続的に強制する**: レビューコメント・リファクタリングPR・ユーザー報告のバグはすべてドキュメント更新に変換するか、ツールに直接エンコードする。ドキュメントで足りなければルールをコードに昇格させる
 
-> Source: [OpenAI: Harness engineering: leveraging Codex in an agent-first world](https://openai.com/index/harness-engineering/)
+技術的負債は高利のローンである。小刻みに払い続けるほうが、巨大な一括返済イベントまで溜め込むよりほぼ常に良い。
 
-## Clean State: More Than "The Code Compiles"
+> 出典: [OpenAI: Harness engineering: leveraging Codex in an agent-first world](https://openai.com/index/harness-engineering/)
 
-Clean state isn't simply "the code compiles." Building without errors is the most basic requirement — the next session shouldn't have to fix build errors first. All tests must pass too, including tests that existed before the session; the session is responsible for not breaking existing functionality. And this should be verified in CI, not just "works on my machine."
+## クリーンな状態は「コンパイルが通る」以上のもの
 
-But that's still not enough. Current progress must be recorded in machine-readable artifacts: completed subtasks with their passing criteria, in-progress but incomplete subtasks with current state, and not-yet-started subtasks. Good progress records can reduce session startup diagnostic time by 60–80%. Temporary artifacts — debug logs, temporary files, commented-out code, TODO markers — must also be cleaned up, because they increase cognitive load for the next session. The standard startup path must remain functional too. Can the next session start working without manual intervention? Environment initialization, codebase loading, context acquisition, task selection — none of these paths can be broken.
+クリーンな状態とは単に「コードがコンパイルできる」ことではない。エラーなくビルドできるのは最低限の要件——次セッションがまずビルドエラー修正から始める事態を避ける。全テスト合格も必須で、セッション開始前から存在したテストも含む——セッションには既存機能を壊さない責任がある。しかも「自分のマシンでは動く」ではなくCIで検証されていること。
 
-## Core Concepts
+それでもまだ足りない。現在の進捗が機械可読な成果物に記録されていること: 完了したサブタスクと合格基準、進行中で未完のサブタスクと現状、未着手のサブタスク。良い進捗記録はセッション開始時の診断時間を60〜80%削減する。一時的な生成物——デバッグログ、一時ファイル、コメントアウトされたコード、TODOマーカー——も掃除する。次セッションの認知負荷を上げるからだ。標準の起動経路も機能し続けていること——環境初期化・コードベース読み込み・コンテキスト取得・タスク選択のどの経路も壊れていてはならず、次セッションが人手の介入なしに作業を始められること。
 
-- **Clean state**: The system must satisfy five conditions at session end — build passes, tests pass, progress recorded, no stale artifacts, startup path available. Missing any one means the session isn't "done."
-- **Session integrity**: Analogous to database transactions — either fully commit and leave a clean state, or roll back to the last consistent state. No middle ground.
-- **Quality document**: An active artifact that continuously records quality ratings for each module. Not a one-time assessment, but a tracker showing whether the codebase is getting stronger or weaker over time.
-- **Cleanup loop**: A regular maintenance session aimed at systematically reducing entropy in the codebase. Not an emergency fix, but routine operations.
-- **Harness simplification**: As model capabilities improve, periodically remove harness components that are no longer necessary. A constraint essential today may be unnecessary overhead in three months.
-- **Idempotent cleanup**: Cleanup operations produce the same result regardless of how many times they run, ensuring cleanup remains safe even in failure-retry scenarios.
+## 核心概念
 
-## "Clean Up Later" Means Never Clean Up
+- **クリーンな状態（Clean State）**: セッション終了時に5条件を満たすこと——ビルド合格・テスト合格・進捗記録済み・残留物なし・起動経路が使える。1つでも欠ければそのセッションは「完了」ではない
+- **セッション完全性（Session Integrity）**: データベーストランザクションのアナロジー——完全にコミットしてクリーンな状態を残すか、最後の一貫した状態までロールバックするか。中間はない
+- **品質ドキュメント（Quality Document）**: 各モジュールの品質評価を継続的に記録する生きた成果物。一回きりの査定ではなく、コードベースが強くなっているか弱くなっているかを時系列で示すトラッカー
+- **クリーンアップループ（Cleanup Loop）**: コードベースのエントロピーを体系的に下げるための定期メンテナンスセッション。緊急対応ではなく、日常運用
+- **ハーネスの簡素化（Harness Simplification）**: モデル能力の向上に合わせ、不要になったハーネス部品を定期的に取り除くこと。今日必須の制約が3ヶ月後には不要なオーバーヘッドかもしれない
+- **冪等なクリーンアップ（Idempotent Cleanup）**: 何回実行しても同じ結果になるクリーンアップ操作。失敗・リトライの場面でも掃除が安全であり続ける
 
-The most common mental trap is "no time to clean up this session, I'll do it next time." But the next agent session doesn't know what you left behind — it sees a mess of code and uncertain state. It'll spend significant time inferring "which parts of this code are intentional and which are temporary."
+## 「あとで掃除する」は「永遠に掃除しない」
 
-Worse, every session has its own task objectives. The new session is there to do new work, not clean up the previous session's mess. It'll ignore the chaos and start new work on top of it, introducing even more chaos. This is entropy's positive feedback loop.
+最もよくある心理的な罠は「このセッションでは掃除する時間がない、次回やろう」。だが次のエージェントセッションは、あなたが何を残したか知らない——見えるのは散らかったコードと不確かな状態だけ。「このコードのどこが意図的でどこが一時的か」の推測に多大な時間を費やす。
 
-The numbers tell the story. A project developed with agents for 12 weeks, without a cleanup strategy:
+さらに悪いことに、各セッションには固有のタスク目標がある。新セッションは新しい仕事をしに来たのであって、前セッションの後始末をしに来たのではない。混沌を無視してその上に新しい作業を積み、さらなる混沌を持ち込む。これがエントロピーの正のフィードバックループである。
 
-- Week 1: Build pass rate 100%, test pass rate 100%, new session startup 5 min
-- Week 4: Build 95%, tests 92%, startup 15 min
-- Week 8: Build 82%, tests 78%, startup 35 min
-- Week 12: Build 68%, tests 61%, startup 60+ min
+数字が物語る。エージェントで12週間開発したプロジェクト、クリーンアップ戦略なしの場合:
 
-Same project with a cleanup strategy:
+- 第1週: ビルド合格率100%、テスト合格率100%、新セッション起動5分
+- 第4週: ビルド95%、テスト92%、起動15分
+- 第8週: ビルド82%、テスト78%、起動35分
+- 第12週: ビルド68%、テスト61%、起動60分超
 
-- Week 1: 100%, 100%, 5 min
-- Week 12: 97%, 95%, 9 min
+同じプロジェクトでクリーンアップ戦略ありの場合:
 
-After 12 weeks: build pass rate differs by 29 percentage points, new session startup time differs by 85%. This is not theoretical — it's an observed difference.
+- 第1週: 100%、100%、5分
+- 第12週: 97%、95%、9分
 
-## How to Do It
+12週間後、ビルド合格率の差は29ポイント、新セッション起動時間の差は85%。理論ではなく観測された差である。
 
-### 1\. Clean State Is a Necessary Condition for Completion
+## 実践方法
 
-Define explicitly in the harness: **session completion = task passes verification AND clean state check passes.** Missing either one means the session isn't complete. Write in CLAUDE.md:
+### 1. クリーンな状態を完了の必要条件にする
+
+ハーネスに明示的に定義する: **セッション完了 = タスクの検証合格 かつ クリーンな状態チェックの合格。** どちらが欠けてもセッションは未完了。CLAUDE.md に書く:
 
 ```
-## Session Exit Checklist
-- [ ] Build passes (npm run build)
-- [ ] All tests pass (npm test)
-- [ ] Feature list updated
-- [ ] No debug code remaining (console.log, debugger, TODO)
-- [ ] Standard startup path available (npm run dev)
+## セッション終了チェックリスト
+- [ ] ビルド合格（npm run build）
+- [ ] 全テスト合格（npm test）
+- [ ] feature list 更新済み
+- [ ] デバッグコードの残留なし（console.log, debugger, TODO）
+- [ ] 標準起動経路が使える（npm run dev）
 ```
 
-### 2\. Dual-Mode Cleanup Strategy
+### 2. 二重モードのクリーンアップ戦略
 
-Combine two cleanup modes:
+2つのモードを組み合わせる。
 
-**Immediate cleanup (at end of every session)**: Clean up temporary artifacts created during the session, update feature list state, ensure build and tests pass. This is "reference counting" cleanup — clean up as soon as you're done using something.
+- **即時クリーンアップ（毎セッション終了時）**: セッション中に作った一時生成物を掃除し、feature list の状態を更新し、ビルドとテストの合格を確認する。「参照カウント」式の掃除——使い終わったらすぐ片付ける
+- **定期クリーンアップ（週次）**: システム全体をスキャン——蓄積した構造的問題への対処、品質ドキュメントの更新、ドリフト検出のためのベンチマークテスト実行。「トレーシング」式の掃除——決まった周期で行う総合メンテナンス
 
-**Periodic cleanup (weekly)**: Full-system scan — handle accumulated structural issues, update quality documents, run benchmark tests to detect drift. This is "tracing" cleanup — a comprehensive maintenance pass done on a regular cadence.
+### 3. 品質ドキュメントを維持する
 
-### 3\. Maintain a Quality Document
-
-A quality document is an active artifact that continuously scores each module:
+品質ドキュメントは各モジュールを継続的に採点する生きた成果物:
 
 ```markdown
-# Quality Document
+# 品質ドキュメント
 
-## User Authentication Module (Quality: A)
-- Verification passing: Yes
-- Agent understandable: Yes
-- Test stability: Stable
-- Architecture boundaries: Compliant
-- Code conventions: Followed
+## ユーザー認証モジュール（品質: A）
+- 検証合格: はい
+- エージェントが理解可能: はい
+- テスト安定性: 安定
+- アーキテクチャ境界: 準拠
+- コード規約: 遵守
 
-## Payment Module (Quality: C)
-- Verification passing: Partial (payment callback untested)
-- Agent understandable: Difficult (logic spread across 3 files)
-- Test stability: Unstable (2 flaky tests)
-- Architecture boundaries: Violations present
-- Code conventions: Partially followed
+## 決済モジュール（品質: C）
+- 検証合格: 部分的（決済コールバックが未テスト）
+- エージェントが理解可能: 困難（ロジックが3ファイルに分散）
+- テスト安定性: 不安定（flakyテスト2件）
+- アーキテクチャ境界: 違反あり
+- コード規約: 部分的に遵守
 ```
 
-New sessions read this document and immediately know where to prioritize. Fix the lowest-scoring module first.
+新セッションはこのドキュメントを読めば、どこを優先すべきか即座に分かる。最低スコアのモジュールから直す。
 
-### 4\. Periodically Simplify the Harness
+### 4. ハーネスを定期的に簡素化する
 
-Every harness component exists because the model couldn't reliably do something on its own. But as models improve, these assumptions become outdated.
+すべてのハーネス部品は「モデルが単独では確実にできなかった何か」のために存在する。だがモデルが向上すると、その前提は古びる。
 
-Anthropic's experiments demonstrated this directly. Their initial harness included a sprint-splitting mechanism — breaking work into small chunks for Sonnet 4.5 to complete one at a time. When Opus 4.6 shipped, the model's native capabilities could handle work decomposition autonomously, making sprint construction unnecessary overhead. After removing it, the builder agent could work continuously for over two hours without drifting — and was actually smoother.
+Anthropicの実験が直接これを示した。初期ハーネスにはスプリント分割機構——作業を小さな塊に割って Sonnet 4.5 に1つずつやらせる仕組み——があった。Opus 4.6 が出ると、モデルのネイティブ能力で作業分解を自律的にこなせるようになり、スプリント構築は不要なオーバーヘッドになった。除去後、ビルダーエージェントは2時間以上ドリフトせずに連続作業でき、むしろスムーズになった。
 
-But the evaluator told a different story. Even with Opus 4.6's stronger capabilities, when tasks approached the model's capability boundary, the evaluator still provided real value — catching the generator's missing functionality and stub implementations. This means the evaluator isn't a fixed yes/no decision; it depends on where task difficulty sits relative to model capability.
+一方、エバリュエーター（評価役エージェント）は別の物語だった。Opus 4.6 の強い能力をもってしても、タスクがモデルの能力境界に近づくと、エバリュエーターは依然として実価値を提供した——ジェネレーターの機能漏れやスタブ実装（中身のない仮実装）を捕捉した。つまりエバリュエーターの要否は固定のYes/Noではなく、タスク難易度がモデル能力に対してどこにあるかに依存する。
 
-**Recommended practice**: Every month, pick one harness component, temporarily disable it, and run benchmark tasks. If results don't degrade, remove it permanently. If they do, restore it or replace it with a lighter alternative.
+**推奨プラクティス**: 毎月ハーネス部品を1つ選び、一時的に無効化してベンチマークタスクを走らせる。結果が劣化しなければ恒久的に除去。劣化すれば復元するか、より軽い代替に置き換える。
 
-A deeper principle: **as models improve, the interesting combinations in a harness don't shrink — they shift.** Problems that previously required explicit solutions get absorbed by model capabilities, but new capability boundaries open up harness design spaces that were previously impossible. The AI engineer's job is to continuously find the next valuable combination.
+より深い原則: **モデルが向上しても、ハーネスの面白い組み合わせは縮むのではなく移動する。** 以前は明示的な解決策が必要だった問題はモデル能力に吸収されるが、新しい能力境界が、以前は不可能だったハーネス設計空間を開く。AIエンジニアの仕事は、次の価値ある組み合わせを探し続けることである。
 
-### 5\. Cleanup Operations Must Be Idempotent
+### 5. クリーンアップ操作は冪等に
 
-Cleanup scripts should be safe to run repeatedly — running them one more time shouldn't produce side effects:
+クリーンアップスクリプトは繰り返し実行しても安全であるべき——もう1回走らせても副作用が出ないこと:
 
 ```bash
-# Idempotent cleanup operations
-rm -f /tmp/debug-*.log  # -f ensures no error when files don't exist
-git checkout -- .env.local  # Restore to known state
-npm run test  # Verify cleanup didn't break anything
+# 冪等なクリーンアップ操作
+rm -f /tmp/debug-*.log  # -f によりファイルが存在しなくてもエラーにならない
+git checkout -- .env.local  # 既知の状態に復元
+npm run test  # クリーンアップで何も壊れていないことを検証
 ```
 
-### 6\. High Throughput Changes the Merge Philosophy
+### 6. 高スループットはマージの哲学を変える
 
-When agent output far exceeds human review capacity, the traditional merge philosophy needs adjustment. The OpenAI team's experience: in an environment where an agent opens 3.5 PRs per day (and later even more), minimizing blocking merge gates is the right call. PRs should be short-lived; test flakiness is usually resolved with subsequent runs rather than indefinitely blocking progress. In a system where the cost of fixing is low and the cost of waiting is high, moving fast with fast fixes is a better strategy than slow confirmation.
+エージェントの出力が人間のレビュー能力を大きく超えると、従来のマージ哲学は調整が必要になる。OpenAIチームの経験: エージェントが1日3.5件（後にはそれ以上）のPRを開く環境では、ブロッキングなマージゲートの最小化が正解だった。PRは短命であるべきで、テストのflakiness（不安定なテストの揺らぎ）は進行を無期限にブロックするより後続の再実行で解消するのが普通。修正コストが低く待機コストが高いシステムでは、「速く動いて速く直す」が「遅く確認する」より良い戦略である。
 
-**Caveat**: This is irresponsible in a low-throughput environment. But when agent output far exceeds human attention, it's often the correct tradeoff. The key criterion: **average cost of fixing a bug vs. average cost of waiting for a human to review a PR.** When the former is lower than the latter, fast merging is the right call.
+**注意**: 低スループット環境でこれをやるのは無責任。だがエージェントの出力が人間の注意力を大きく超えるとき、これはしばしば正しいトレードオフになる。判断基準は **「バグ修正の平均コスト vs 人間のPRレビュー待ちの平均コスト」**。前者が後者より低いなら、高速マージが正解。
 
-## Real-World Case
+## 実例
 
-An Electron app developed with agents over 12 weeks, comparing two approaches:
+エージェントで12週間開発したElectronアプリで、2方式を比較した。
 
-**Without cleanup strategy** (control group): Week 12, build pass rate 68%, test pass rate 61%, new session startup 60+ min, 103 stale artifacts.
+- **クリーンアップ戦略なし（対照群）**: 第12週、ビルド合格率68%、テスト合格率61%、新セッション起動60分超、残留物103件
+- **クリーンアップ戦略あり（実験群）**: 毎セッション終了時にクリーン状態のフルチェック、加えて週次クリーンアップループ。第12週、ビルド合格率97%、テスト合格率95%、新セッション起動9分、残留物11件
 
-**With cleanup strategy** (experimental group): Full clean-state check at every session end, plus a weekly cleanup loop. Week 12, build pass rate 97%, test pass rate 95%, new session startup 9 min, 11 stale artifacts.
+第12週時点で、実験群はビルド合格率が29ポイント、テスト合格率が34ポイント高く、新セッション起動時間は85%短い。各セッションがクリーンアップに余分に費やしたのは5分だが、12週間で数十時間分の混乱を節約した。
 
-By week 12, the experimental group's build pass rate was 29 percentage points higher, test pass rate 34 points higher, and new session startup time 85% lower. Each session spent an extra 5 minutes on cleanup, but over 12 weeks that saved dozens of hours of chaos.
+## 要点
 
-## Key Takeaways
+- **クリーンな状態はセッション完了の必要条件**——任意の片付けではなく、「完了の定義」の一部
+- **5つの観点はすべて必須**——ビルド・テスト・進捗・残留物・起動経路。それぞれ明示的にチェックする
+- **品質ドキュメントでコードベースの健全性を追跡可能にする**——劣化していると分かって初めて先回りで直せる
+- **ハーネスを定期的に簡素化する**——モデル能力の向上に合わせ、不要になった制約を取り除く
+- **「あとで掃除」は「永遠に掃除しない」と同義。** エントロピー増大がデフォルト状態であり、能動的な掃除だけがそれに対抗する
 
-- **Clean state is a necessary condition for session completion** — not optional housekeeping, but part of the "definition of done."
-- **All five dimensions are non-negotiable** — build, tests, progress, artifacts, startup — each must be explicitly checked.
-- **Quality documents make codebase health trackable** — you can only proactively fix what you know is degrading.
-- **Periodically simplify the harness** — as model capabilities improve, remove constraints that are no longer needed.
-- **"Clean up later" equals never cleaning up.** Entropy growth is the default state; only active cleanup counteracts it.
+## 演習
 
-## Further Reading
+1. **クリーン状態チェックリスト**: 自分のコードベース向けに5観点をカバーするセッション終了チェックリストを設計する。5セッション連続で適用し、観点ごとの違反件数を記録する
+2. **ベンチマーク比較**: 固定タスクセットを2種のハーネス（クリーン状態要件あり/なし)で実行し、完了率・リトライ回数・欠陥のすり抜け率を比較する
+3. **ハーネス簡素化の実践**: ハーネス部品を1つ選んで一時的に無効化し、ベンチマークタスクを実行する。あり/なしの結果を比較し、維持・除去・置換を判断する
 
-- [Clean Code - Robert C. Martin](https://www.goodreads.com/book/show/3735293-clean-code) — Systematic principles of code cleanliness
-- [Harness Engineering - OpenAI](https://openai.com/index/harness-engineering/) — Reproducibility as a core harness design requirement
-- [Effective Harnesses - Anthropic](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — The critical role of clean session exits for long-term reliability
-- [Programs, Life Cycles, and Laws of Software Evolution - Lehman](https://ieeexplore.ieee.org/document/1702314) — Software evolution laws proving system complexity inevitably grows without active maintenance
+## 参考文献
 
-## Exercises
+- [Clean Code - Robert C. Martin](https://www.goodreads.com/book/show/3735293-clean-code) — コードの清潔さの体系的原則
+- [Harness Engineering - OpenAI](https://openai.com/index/harness-engineering/) — 再現性をハーネス設計の中核要件とする
+- [Effective Harnesses - Anthropic](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) — クリーンなセッション終了が長期信頼性に果たす役割
+- [Programs, Life Cycles, and Laws of Software Evolution - Lehman](https://ieeexplore.ieee.org/document/1702314) — 能動的な保守なしにシステムの複雑性は必ず増大することを示したソフトウェア進化の法則
 
-1. **Clean State Checklist**: Design a session exit checklist for your codebase covering all five dimensions. Apply it across 5 consecutive sessions and record the number of violations per dimension.
-2. **Benchmark Comparison**: Use a fixed task set with two harness variants (with/without clean state requirements). Compare completion rate, retry count, and defect escape rate.
-3. **Harness Simplification Practice**: Pick one harness component, temporarily disable it, and run benchmark tasks. Compare results with and without it. Decide whether to keep, remove, or replace.
+---
+
+出典: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/

@@ -1,141 +1,142 @@
-[中文版 →](https://walkinglabs.github.io/learn-harness-engineering/zh/lectures/lecture-05-why-long-running-tasks-lose-continuity/)
+# Lecture 05: なぜ長時間タスクは継続性を失うのか
 
-> Code examples: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/code/) Practice project: [Project 03. Multi-session continuity](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/code/) 実践プロジェクト: [Project 03. Multi-session continuity](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-03-multi-session-continuity/)
 
-You ask Claude Code to implement a complete feature. It runs for 30 minutes, does most of the work, but context is running low. You start a new session to continue — and discover it doesn't remember what decisions were made last time, why option A was chosen over option B, which files were already modified, or what state the tests are in. It spends 15 minutes re-exploring the project, and might take an inconsistent approach from last time.
+Claude Code に完全な機能の実装を頼む。30分動いて大部分を終えたが、コンテキスト残量が少なくなった。続きのために新セッションを開始すると——前回どんな決定をしたか、なぜ案Bでなく案Aを選んだか、どのファイルを修正済みか、テストがどの状態かを何も覚えていない。15分かけてプロジェクトを再探索し、前回と一貫しないアプローチを取るかもしれない。
 
-This is the real dilemma AI coding agents face in cross-session tasks. This lecture explains why agents "lose the thread" during long tasks, and how structured state persistence lets a new session quickly pick up where the last one left off.
+これがセッション横断タスクでAIコーディングエージェントが直面する現実の課題である。
 
-## Context Windows: Not Infinite
+結論: エージェントが長タスクで「糸を見失う」のは構造的必然であり、解決策はウィンドウ拡大ではなく、構造化された状態の永続化（進捗ファイル・決定ログ・gitチェックポイント）で新セッションが素早く引き継げるようにすることである。
 
-Context windows are finite. This isn't a problem that model upgrades can solve — even if window sizes grow to 1M tokens, complex tasks will still exhaust them. Agents aren't just generating code; they're understanding codebases, tracking their own decision history, processing tool output, and maintaining conversation context. All this information grows faster than window expansion.
+## コンテキストウィンドウは無限ではない
 
-A deeper problem: the information agents produce isn't uniformly important. Intermediate reasoning steps contain the "why" of decisions — why option A was chosen over B, why this library instead of that one, why a particular optimization was skipped. The final output only contains the "what" — the code itself. Compaction strategies usually preserve the latter but lose the former. The next session sees the code but doesn't know why it's written that way, and might "optimize" away a deliberate design decision.
+コンテキストウィンドウは有限である。これはモデルのアップグレードでは解決しない——ウィンドウが1Mトークンに育っても、複雑なタスクはやはり使い切る。エージェントはコードを生成するだけでなく、コードベースを理解し、自分の決定履歴を追跡し、ツール出力を処理し、会話の文脈を維持する。これらの情報はウィンドウの拡大より速く増える。
 
-Anthropic observed something interesting in their long-running agent research: when agents sense context is running low, they exhibit a "rushed finish" behavior — rushing to finish current work, skipping verification steps, or choosing a simple solution over the optimal one. Anthropic calls this "context anxiety."
+より深い問題: エージェントが生み出す情報は重要度が均一ではない。中間の推論ステップには決定の「なぜ」——なぜ案Bでなく案Aか、なぜこのライブラリか、なぜある最適化を見送ったか——が含まれる。最終出力に含まれるのは「何」——コードそのもの——だけ。コンパクション（compaction: 古い会話を要約して圧縮する処理）は通常、後者を残して前者を失う。次セッションはコードを見ても「なぜそう書かれているか」を知らず、意図的な設計判断を「最適化」して壊すかもしれない。
 
-## Session Continuity Flow
+Anthropicは長時間実行エージェントの研究で興味深い現象を観測した: コンテキスト残量が少ないと察知したエージェントは「駆け込み完了」行動を示す——今の作業を急いで終わらせ、検証を飛ばし、最適解より単純解を選ぶ。Anthropicはこれを「コンテキスト不安（context anxiety）」と呼ぶ。
 
-Without state persistence files, every new session has to start from scratch:
+## セッション継続のフロー
 
-With state persistence files, new sessions can pick up quickly:
+状態永続化ファイルがなければ、新セッションは毎回ゼロから始めるしかない。状態永続化ファイルがあれば、新セッションは素早く引き継げる。
 
-## Core Concepts
+## 核心概念
 
-- **Context windows are finite**: No matter what window size is claimed (128K, 200K, 1M), long tasks will eventually exhaust them. After exhaustion, either compaction (losing information) or reset (starting a new session) is required — both lose something.
-- **State persistence files**: Persisted state files that let a new session unambiguously resume where the last one left off. The most basic form includes progress logs, verification records, and next actions.
-- **Rebuild cost**: The time a new session needs to reach an executable state. A good harness can compress rebuild cost from 15 minutes to 3 minutes.
-- **Drift**: The gap between the agent's understanding and the actual state of the code repository. Every session boundary introduces drift; without control, it compounds session after session.
-- **Context anxiety**: A phenomenon observed by Anthropic — agents exhibit rushed finish behavior when approaching context limits, ending tasks early to avoid information loss. At its core, it's an irrational resource anxiety.
-- **Compaction vs. reset**: Compaction summarizes context within the same session (keeps "what," may lose "why"); reset opens a new session rebuilding from persisted state (clean but depends on artifact completeness).
+- **コンテキストウィンドウは有限**: 公称サイズ（128K、200K、1M）に関わらず、長タスクはいずれ使い切る。使い切った後はコンパクション（情報喪失）かリセット（新セッション開始）しかなく、どちらも何かを失う
+- **状態永続化ファイル（State Persistence Files）**: 新セッションが曖昧さなく前回の続きから再開できるようにする永続ファイル。最も基本的な形は進捗ログ・検証記録・次のアクション
+- **再構築コスト（Rebuild Cost）**: 新セッションが実行可能な状態に到達するまでの時間。良いハーネスは15分を3分に圧縮できる
+- **ドリフト（Drift）**: エージェントの理解とリポジトリの実際の状態の乖離。セッション境界のたびにドリフトが入り込み、制御しなければセッションごとに複利で積み上がる
+- **コンテキスト不安（Context Anxiety）**: Anthropicが観測した現象。コンテキスト上限に近づくと、情報喪失を避けようとタスクを早期に切り上げる駆け込み行動を示す。本質的には非合理的なリソース不安
+- **コンパクション vs リセット**: コンパクションは同一セッション内でコンテキストを要約する（「何」は残るが「なぜ」を失いがち）。リセットは新セッションを開いて永続化された成果物から再構築する（クリーンだが成果物の完全性に依存する）
 
-## What Happens When Continuity Breaks
+## 継続性が切れると何が起きるか
 
-The previous session spent significant context budget analyzing three approaches and choosing option B. This session's agent doesn't know about that analysis and might re-decide based on incomplete information — potentially choosing option A. Same information, different conclusion, because the decision-making context is gone.
+- **決定の文脈が消える**: 前セッションが多大なコンテキスト予算を使って3案を分析し案Bを選んだのに、今セッションのエージェントはその分析を知らず、不完全な情報で再決定する——案Aを選ぶかもしれない。同じ情報でも結論が変わる。意思決定の文脈が消えたからだ
+- **重複作業**: ある作業が完了済みか確信が持てず、もう一度やる。さらに悪いと半分やったところで既存実装との衝突に気づき、やり直しになる。進捗記録がなければ、新セッションは何が済んでいるか知る術がない
+- **方向のドリフト**: 数セッションのうちに実装の方向が当初の要件から静かにずれていく。新セッションごとにプロジェクト目標の理解が少しずつ違い、ずれが前のずれの上に複利で積み上がり、最終結果は当初の意図から遠く離れる
+- **検証ギャップ**: 前セッションの検証結果（どのテストが通り、どれが落ち、なぜ落ちたか）が記録されていない。新セッションは現状把握のために全検証をやり直す。毎セッションがゼロから再診断し、毎回貴重なコンテキストを浪費する
 
-Even worse is duplicate work. The agent isn't sure whether certain work was already completed and does it again. Or worse — does half of it, discovers a conflict with the existing implementation, and has to rework. Without progress records, the new session has no idea what's already been done.
+OpenAIもAnthropicも構造化された状態の永続化を強調している。OpenAIのハーネスエンジニアリング記事はリポジトリを「運用記録（operational record）」として扱う——すべての操作の結果は追跡可能な証拠をリポジトリに残すべき。Anthropicの長時間実行エージェントのドキュメントは「ハンドオフファイル」——現在の状態・既知の問題・次のアクションを含む構造化文書——を明確に推奨している。
 
-Over several sessions, the implementation direction may have silently drifted from the original requirements. Each new session has a slightly different understanding of the project goals. Each deviation compounds on the last, and the final result may be far removed from the original intent.
+## 状態永続化の実践
 
-There's also the verification gap. The previous session's verification results (which tests pass, which fail, why they fail) weren't recorded. The new session has to re-run all verification to understand the current state. Every session re-diagnoses from scratch, every time wasting precious context.
+中核の考え方: **エージェントを「セッションごとに短期記憶が消去されるエンジニア」として扱う。** 「退勤」前に重要情報を書き残し、次の「シフト」のエージェントが素早く引き継げるようにする。
 
-Both OpenAI and Anthropic emphasize structured state persistence in their documentation. OpenAI's harness engineering article treats the repository as an "operational record" — every operation's results should leave traceable evidence in the repo. Anthropic's long-running agents documentation specifically recommends "handoff files" — structured documents containing current state, known issues, and next actions.
-
-## Practical Approaches to State Persistence
-
-Core approach: **Treat the agent like an engineer whose short-term memory gets wiped at every session.** Before it "clocks out," it must write down critical information so the next "shift" agent can pick up quickly.
-
-**Tool 1: Progress file (PROGRESS.md).** The most basic state persistence file:
+**ツール1: 進捗ファイル（PROGRESS.md）。** 最も基本的な状態永続化ファイル:
 
 ```markdown
-# Project Progress
+# プロジェクト進捗
 
-## Current State
-- Latest commit: abc1234 (feat: add user preferences endpoint)
-- Test status: 42/43 passing (test_pagination_edge_case failing)
-- Lint: passing
+## 現在の状態
+- 最新コミット: abc1234 (feat: add user preferences endpoint)
+- テスト状態: 42/43 合格（test_pagination_edge_case が失敗中）
+- Lint: 合格
 
-## Completed
-- [x] User model and database migration
-- [x] Basic CRUD endpoints
-- [x] Auth middleware integration
+## 完了
+- [x] ユーザーモデルとDBマイグレーション
+- [x] 基本CRUDエンドポイント
+- [x] 認証ミドルウェア統合
 
-## In Progress
-- [ ] Pagination feature (90% - edge case test failing)
+## 進行中
+- [ ] ページネーション機能（90%——エッジケースのテストが失敗）
 
-## Known Issues
-- test_pagination_edge_case returns 500 on empty result sets
-- Need to confirm whether deleted users should appear in listings
+## 既知の問題
+- test_pagination_edge_case が空の結果セットで500を返す
+- 削除済みユーザーを一覧に出すべきか要確認
 
-## Next Steps
-1. Fix pagination edge case bug
-2. Add "include deleted users" query parameter
-3. Update API documentation
+## 次のステップ
+1. ページネーションのエッジケースバグを修正
+2. 「削除済みユーザーを含める」クエリパラメータを追加
+3. APIドキュメントを更新
 ```
 
-**Tool 2: Decision log (DECISIONS.md).** Record important design decisions and reasons. No need for detailed design documents — just "what decision, why, when":
+**ツール2: 決定ログ（DECISIONS.md）。** 重要な設計決定と理由を記録する。詳細な設計書は不要——「何を決めたか・なぜ・いつ」だけでよい:
 
 ```markdown
-# Design Decisions
+# 設計決定
 
-## 2024-01-15: Use Redis for user preferences caching
-- Reason: High read frequency (every API call), small data size
-- Rejected alternative: PostgreSQL materialized view (high change frequency makes maintenance cost not worthwhile)
-- Constraint: Cache TTL of 5 minutes, active invalidation on write
+## 2024-01-15: ユーザー設定のキャッシュに Redis を採用
+- 理由: 読み取り頻度が高く（API呼び出しごと）、データサイズが小さい
+- 却下した代替案: PostgreSQL マテリアライズドビュー（変更頻度が高く保守コストが見合わない）
+- 制約: キャッシュTTL 5分、書き込み時にアクティブ無効化
 ```
 
-**Tool 3: Git commits as checkpoints.** Commit after completing each atomic unit of work. Commit messages should explain what was done and why. These are free, automatically versioned state snapshots.
+**ツール3: gitコミットをチェックポイントに。** 原子的な作業単位を終えるたびにコミットする。コミットメッセージには「何をなぜ」を書く。無料で自動バージョン管理される状態スナップショットである。
 
-**Tool 4: init.sh or harness initialization flow.** Specify in `AGENTS.md` the "clock-in" and "clock-out" routines:
+**ツール4: init.sh またはハーネスの初期化フロー。** AGENTS.md に「出勤」「退勤」のルーチンを規定する:
 
 ```markdown
-## At session start (clock in)
-1. Read PROGRESS.md for current state
-2. Read DECISIONS.md for important decisions
-3. Run make check to confirm repo is in consistent state
-4. Continue from PROGRESS.md "Next Steps" section
+## セッション開始時（出勤）
+1. PROGRESS.md を読んで現在の状態を把握
+2. DECISIONS.md を読んで重要な決定を把握
+3. make check を実行してリポジトリが一貫した状態であることを確認
+4. PROGRESS.md の「次のステップ」から作業を継続
 
-## Before session end (clock out)
-1. Update PROGRESS.md
-2. Run make check to confirm consistent state
-3. Commit all completed work
+## セッション終了前（退勤）
+1. PROGRESS.md を更新
+2. make check を実行して一貫した状態を確認
+3. 完了した作業をすべてコミット
 ```
 
-**Mixed strategy**: Not every task needs a context reset. Short tasks (under 30 minutes) can complete within one session. Long tasks (spanning sessions) must use progress files and decision logs for continuity. Decision criterion: if a task needs more than 60% of the window, start preparing the handoff.
+**混合戦略**: すべてのタスクにコンテキストリセットが必要なわけではない。短いタスク（30分未満）は1セッション内で完結できる。長いタスク（セッションをまたぐ）は進捗ファイルと決定ログで継続性を確保する。判断基準: タスクがウィンドウの60%超を必要としそうなら、ハンドオフの準備を始める。
 
-### A Deeper Look at Context Anxiety
+### コンテキスト不安を深掘りする
 
-Anthropic's March 2026 research further revealed the specific manifestations of context anxiety: on Sonnet 4.5, when context approaches the window limit, the agent shows strong "rushed finish" behavior.
+Anthropicの2026年3月の研究は、コンテキスト不安の具体的な現れをさらに明らかにした: Sonnet 4.5 では、コンテキストがウィンドウ上限に近づくと強い「駆け込み完了」行動が出る。
 
-Two strategies address this:
+対処戦略は2つ:
 
-**Compaction**: Summarizing early conversation within the same session. Advantage: maintains continuity, the agent can see "what." Disadvantage: "why" is often lost in summaries — why option B was chosen over A, why a particular optimization was skipped. More critically, compaction doesn't eliminate context anxiety — the agent knows context was once large, and psychologically still tends to rush to finish.
+- **コンパクション**: 同一セッション内で序盤の会話を要約する。利点: 連続性が保たれ、エージェントは「何」を見られる。欠点: 「なぜ」が要約で失われがち——なぜ案Bを選んだか、なぜある最適化を見送ったか。さらに重要なのは、コンパクションではコンテキスト不安が消えないこと——エージェントは「かつてコンテキストが大きかった」ことを知っており、心理的には依然として急いで終わらせようとする
+- **コンテキストリセット**: コンテキストを完全にクリアして新セッションを開き、永続化された成果物から再構築する。利点: クリーンな精神状態——新セッションには「時間がない」という不安がない。欠点: ハンドオフ成果物の完全性に依存する。進捗ファイルに重要情報が欠けていれば、新セッションは間違った方向に時間を浪費しかねない
 
-**Context reset**: Completely clearing context, opening a new session, rebuilding from persisted artifacts. Advantage: clean mental state — the new session has no "I'm running out of time" anxiety. Disadvantage: depends on the completeness of handoff artifacts. If the progress file is missing critical information, the new session may waste time going in the wrong direction.
+Anthropicの実データ: Sonnet 4.5 ではコンテキスト不安が深刻で、コンパクションだけでは不十分——コンテキストリセットがハーネス設計の重要部品になる。一方 Opus 4.5 ではこの行動が大幅に減り、リセットに頼らずコンパクションでコンテキストを管理できる。つまり: **ハーネス設計には対象モデルへの具体的な理解が必要で、万能テンプレートは存在しない。**
 
-Anthropic's actual data: for Sonnet 4.5, context anxiety is severe enough that compaction alone isn't sufficient — context reset becomes a critical component of harness design. But for Opus 4.5, this behavior is greatly diminished, and compaction can manage context without relying on resets. This means: **harness design needs specific understanding of the target model, not a one-size-fits-all template.**
+> 出典: [Anthropic: Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
 
-> Source: [Anthropic: Harness design for long-running application development](https://www.anthropic.com/engineering/harness-design-long-running-apps)
+## 実例
 
-## Real-World Example
+ユーザー認証付きブログシステムの実装をエージェントに任せた——機能ポイント12個、推定5セッション。
 
-An agent was tasked with implementing a blog system with user authentication — 12 feature points, estimated 5 sessions needed.
+- **状態永続化ファイルなし（ベースライン）**: セッション1でユーザーモデルと基本ルートを実装。セッション2は認証ミドルウェアのインターフェース契約を覚えておらず、前回の設計意図の推測に約15分を消費。セッション3では蓄積したドリフトにより完了済み機能の再実装を始めた。セッション5終了時点で、リポジトリには冗長コードが大量にあるのに中核の認証機能はE2E（エンドツーエンド: 利用者の操作を最初から最後まで通しで確認する）テストに合格せず。12個中7個完了、うち3個に隠れた正しさの問題
+- **状態永続化ファイルあり**: 進捗ファイル・決定ログ・検証記録・gitチェックポイントを使用。各セッション終了時に状態レポートを自動更新。セッション2の再構築コストは約3分に低下。セッション5で12個全機能が完了・検証済み
 
-**Baseline without state persistence files**: Session 1 implemented the user model and basic routes. Session 2 started without the agent remembering the auth middleware's interface contract, spending ~15 minutes inferring the previous design intent. By session 3, accumulated drift caused the agent to start reimplementing already-completed features. By session 5, the repo contained lots of redundant code but the core auth feature still hadn't passed end-to-end tests. Only 7 of 12 feature points completed, 3 with hidden correctness issues.
+定量比較: 再構築時間は約78%削減、機能完成率は58%から100%へ、隠れ欠陥率は43%から8%へ。
 
-**With state persistence files**: Using progress files, decision logs, verification records, and git checkpoints. State report updated automatically at each session end. Session 2's rebuild cost dropped to ~3 minutes. By session 5, all 12 feature points completed and verified.
+## 要点
 
-Quantitative comparison: rebuild time reduced ~78%, feature completion rate from 58% to 100%, hidden defect rate from 43% down to 8%.
+- コンテキストウィンドウは有限資源。長タスクはセッションをまたぎ、セッションは情報を失う——これは客観的事実
+- 解決策はウィンドウ拡大ではなく、より良い状態の永続化。進捗ファイル・決定ログ・gitチェックポイントの組み合わせで、新セッションが前回の続きから再開できるようにする
+- エージェントを「セッションごとに短期記憶が消えるエンジニア」として扱う: 「退勤」前に、何をしたか・なぜか・次は何かを書き残させる
+- 再構築コストが鍵となるメトリクス。良いハーネスは新セッションを3分以内に実行可能状態へ持っていく
+- 混合戦略: 短いタスクはセッション内で完結、長いタスクは構造化された成果物で継続性を確保
 
-## Key Takeaways
+## 演習
 
-- Context windows are a finite resource. Long tasks will span sessions, and sessions will lose information — this is objective reality.
-- The solution isn't bigger windows — it's better state persistence. Progress files, decision logs, and git checkpoints work together to let new sessions pick up where previous ones left off.
-- Treat the agent like an engineer whose short-term memory gets wiped every session: before "clocking out," write down what was done, why, and what's next.
-- Rebuild cost is the key metric. A good harness should get new sessions to an executable state within 3 minutes.
-- Mixed strategy: short tasks within sessions, long tasks with structured artifacts for continuity.
+1. **状態永続化の測定**: 3セッション以上必要な開発タスクを選ぶ。状態永続化ファイルなしで、各セッション開始時に「前回何があったかの把握」に消費するコンテキスト量を記録する。次に各セッション後に進捗ファイルを作り、次セッションをそこから始めさせる。進捗ファイル有無での再構築コストを比較する
+2. **ハンドオフテンプレート設計**: 4フィールド——リポジトリ状態（コミットハッシュ）・実行時状態（テスト合格率）・ブロッカー・次のアクション——の最小ハンドオフテンプレートを設計する。完全に新しいエージェントセッションにこのテンプレートだけでプロジェクト状態を復元させ、復元中に遭遇した曖昧さを記録してテンプレートを改善する
+3. **混合戦略の実験**: 5セッションの開発タスクで3戦略を比較する: (a) 常に新セッション + 進捗ファイル、(b) 1セッションで可能な限り粘る（コンテキストコンパクション）、(c) 混合戦略（短タスクはセッション内、長タスクはセッション横断 + 進捗ファイル）。再構築時間・機能完成率・決定の一貫性を比較する
 
-## Further Reading
+## 参考文献
 
 - [Anthropic: Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
 - [OpenAI: Harness Engineering](https://openai.com/index/harness-engineering/)
@@ -143,8 +144,6 @@ Quantitative comparison: rebuild time reduced ~78%, feature completion rate from
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
 - [HumanLayer: Harness Engineering for Coding Agents](https://humanlayer.dev/articles/harness-engineering-for-coding-agents/)
 
-## Exercises
+---
 
-1. **State persistence measurement**: Pick a development task needing at least 3 sessions. Without providing any state persistence files, record at each session start how much context the agent spends "figuring out what happened last time." After each session, create a progress file and let the next session start from it. Compare rebuild costs with and without progress files.
-2. **Handoff template design**: Design a minimal handoff template with four fields: repo state (commit hash), runtime state (test pass rate), blockers, next actions. Let a completely fresh agent session restore project state using only this template. Record ambiguities encountered during restoration, iterate to improve the template.
-3. **Mixed strategy experiment**: In a 5-session development task, compare three strategies: (a) always start fresh sessions + progress files, (b) do as much as possible in one session (context compaction), (c) mixed strategy (short tasks in-session, long tasks across sessions + progress files). Compare rebuild time, feature completion rate, and decision consistency.
+出典: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-05-why-long-running-tasks-lose-continuity/

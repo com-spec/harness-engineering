@@ -1,86 +1,82 @@
-[中文版 →](https://walkinglabs.github.io/learn-harness-engineering/zh/lectures/lecture-02-what-a-harness-actually-is/)
+# Lecture 02: ハーネスとは実際のところ何なのか
 
-> Code examples: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-02-what-a-harness-actually-is/code/) Practice project: [Project 01. Prompt-only vs. rules-first](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-02-what-a-harness-actually-is/code/) 実践プロジェクト: [Project 01. Prompt-only vs. rules-first](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/)
 
-The word "harness" gets thrown around a lot in AI coding agent circles, but most of the time, when people say "harness," they really just mean a prompt file. A prompt file is not a harness.
+AIコーディングエージェント界隈で「ハーネス」という言葉は頻繁に使われるが、多くの場合その実態は単なるプロンプトファイルを指している。プロンプトファイルはハーネスではない。
 
-This lecture gives harness a precise, actionable definition — not an academic abstraction, but a framework you can put to work today. A harness consists of five subsystems: instructions, tools, environment, state, and feedback. Each subsystem has clear responsibilities and evaluation criteria.
+結論: ハーネスとは「指示・ツール・環境・状態・フィードバック」の5サブシステムからなる、モデルの外側のエンジニアリング基盤全体である。学術的な抽象論ではなく、今日から使える実務フレームワークとして定義する。
 
-## Start with an Analogy
+## まずアナロジーから
 
-Imagine you are a newly hired engineer, dropped into a project with zero documentation. No README, no comments in the code, nobody tells you how to run tests, CI config is buried somewhere. Can you write good code? Maybe — if you are smart enough and patient enough. But you will spend an enormous amount of time on "figuring out what this project is about" rather than on "solving the problem."
+あなたが新入社員のエンジニアで、ドキュメントゼロのプロジェクトに放り込まれたと想像してほしい。READMEなし、コードにコメントなし、テストの実行方法を誰も教えてくれず、CI設定はどこかに埋もれている。良いコードを書けるか？賢く忍耐強ければ書けるかもしれない。だが膨大な時間を「このプロジェクトは何なのかの把握」に費やし、「問題解決」には使えない。
 
-An AI agent faces the exact same predicament, and it is even worse. You can at least ask a colleague. The agent can only see the files you put in front of it and the commands it can execute.
+AIエージェントはまったく同じ苦境にあり、しかもさらに悪い。人間は同僚に聞けるが、エージェントは目の前に置かれたファイルと実行できるコマンドしか見えない。
 
-OpenAI frames the core principle of harness engineering as "the repo IS the spec" — all necessary context should live in the repository, delivered through structured instruction files, explicit verification commands, and clear directory organization. Anthropic's long-running agents documentation emphasizes state persistence, explicit recovery paths, and structured progress tracking. The two companies focus on different aspects, but they are saying the same thing: **everything in the engineering infrastructure outside the model determines how much of the model's capability actually gets realized.**
+OpenAIはハーネスエンジニアリングの中核原則を「リポジトリこそが仕様（the repo IS the spec）」と表現する。必要なコンテキストはすべてリポジトリ内に置き、構造化された指示ファイル・明示的な検証コマンド・明快なディレクトリ構成で届ける。Anthropicの長時間実行エージェントのドキュメントは、状態の永続化・明示的な復旧経路・構造化された進捗管理を強調する。両社の力点は違うが、言っていることは同じ——**モデルの外側のエンジニアリング基盤が、モデルの能力がどれだけ実際に発揮されるかを決める。**
 
-Look at a few tools you already know:
+既知のツールで見てみると:
 
-**Claude Code** embodies harness thinking. It reads `CLAUDE.md` from your repo, can run shell commands, executes in your local environment, maintains session history, and can run tests to see results. But if you do not tell it how to run tests, it has no way to verify whether it did things right.
+- **Claude Code**: ハーネス思考の体現。リポジトリの `CLAUDE.md` を読み、シェルコマンドを実行し、ローカル環境で動き、セッション履歴を保持し、テストを走らせて結果を見られる。ただしテストの実行方法を教えなければ、正しくできたか検証する術がない
+- **Cursor**: 同様のロジック。`.cursorrules` が指示源、ターミナルがツール、プロジェクト構造やlint設定も読める。ただし状態管理は比較的弱く、IDEを閉じて開き直すと以前のコンテキストは消える
+- **Codex**（OpenAIのコーディングエージェント）: git worktree（同一リポジトリの作業ディレクトリを複製して隔離する仕組み）でタスクごとに実行環境を隔離し、ローカルの可観測性スタック（ログ・メトリクス・トレース）と組み合わせて、すべての変更を独立環境で検証する。AGENTS.md と明確な検証コマンドのあるリポジトリでは「裸」のリポジトリより遥かに良く動く
+- **AutoGPT**: 反面教師。構造化された状態管理がないため長タスクでコンテキストが際限なく膨らみ、精密なフィードバック機構がないためループに陥る。「AutoGPTは使えない」とよく言われるが、実際に使えないのはハーネスのほうである
 
-**Cursor** follows similar logic. Its `.cursorrules` file is its instruction source, the terminal is its tool, and it can read your project structure and lint config. However, Cursor's state management is relatively weak — close the IDE and reopen it, and the previous context is gone.
+## 核心概念
 
-**Codex** (OpenAI's coding agent) uses git worktrees to isolate each task's runtime environment, paired with a local observability stack (logs, metrics, traces), so every change is verified in an independent environment. It performs far better in repos with an `AGENTS.md` and clear verification commands than in "bare" repos.
+- **ハーネスとは**: モデルの重み以外のエンジニアリング基盤すべて。OpenAIはエンジニアの中核業務を「環境を設計する・意図を表現する・フィードバックループを構築する」の3つに凝縮した。Anthropicは自社の Claude Agent SDK を「汎用エージェントハーネス」と直接呼んでいる
+- **リポジトリは唯一の真実の源（SSOT: Single Source of Truth、唯一の正となる情報源）**: エージェントに見えないものは事実上存在しない。OpenAIはリポジトリを「システム・オブ・レコード（正式な記録台帳）」として扱い、必要なコンテキストはすべてそこに置けとする
+- **マニュアルではなく地図を渡す**: OpenAIの経験則では、AGENTS.md は百科事典ではなく目次ページであるべき。100行程度で十分。収まらなければ `docs/` ディレクトリに分割し、エージェントに必要時に読ませる
+- **マイクロマネジメントせず制約する**: 良いハーネスは指示を逐一列挙するのではなく、実行可能なルールで制約する。OpenAIは「不変条件を強制せよ、実装をマイクロマネジメントするな」と言い、Anthropicは「エージェントは自分の成果を自信満々に自賛する」と観察し、解決策として「作業する者」と「検査する者」の分離を挙げる
+- **1つずつ外して観察する**: 各ハーネス部品の限界貢献を定量化するには、1つずつ外してどの除去が最も性能を落とすかを見る。Anthropicはこの方法で「モデルが強くなるとクリティカルでなくなる部品がある一方、新たなクリティカル部品が常に現れる」ことを発見した
 
-**AutoGPT** is the cautionary tale. Its lack of structured state management causes context to accumulate endlessly during long tasks, and its lack of precise feedback mechanisms causes the agent to loop. Many people say AutoGPT "doesn't work," but really it is the harness that does not work.
+## ハーネスの5サブシステムモデル
 
-## Core Concepts
+冒頭のアナロジーに戻ると、ハーネスは5つのサブシステムを持つ。
 
-- **What is a harness**: Everything in the engineering infrastructure outside the model weights. OpenAI distills the engineer's core job into three things: designing environments, expressing intent, and building feedback loops. Anthropic directly calls their Claude Agent SDK a "general-purpose agent harness."
-- **The repo is the single source of truth**: Anything the agent cannot see, for all practical purposes, does not exist. OpenAI treats the repo as the "system of record" — all necessary context must live there, delivered through structured files and clear directory organization.
-- **Give a map, not a manual**: OpenAI's experience is that `AGENTS.md` should be a directory page, not an encyclopedia. Around 100 lines is enough. If it does not fit, split it into a `docs/` directory and let the agent read on demand.
-- **Constrain, don't micromanage**: A good harness uses executable rules to constrain the agent, rather than enumerating instructions one by one. OpenAI says "enforce invariants, don't micromanage implementation"; Anthropic found that agents confidently praise their own work, and the solution is to separate "the person who does the work" from "the person who checks the work."
-- **Remove one at a time and observe**: To quantify each harness component's marginal contribution, remove them one at a time and see which removal causes the biggest performance drop. This tells you which components are most valuable right now, and it also reveals which ones are not yet contributing meaningfully. Anthropic used this method and discovered that as models get stronger, some components stop being critical — but new critical components always emerge.
-
-## The Five-Subsystem Harness Model
-
-Back to the analogy. A harness has five subsystems:
-
-**Instruction subsystem**: Create `AGENTS.md` (or `CLAUDE.md`) containing a project overview and purpose, tech stack and versions, first-run commands, non-negotiable hard constraints, and links to more detailed documentation.
-
-**Tool subsystem**: Ensure the agent has sufficient tool access. Do not disable shell for "security reasons" — if the agent cannot even run `pip install`, how is it supposed to get anything done? But do not open everything either — follow the principle of least privilege.
-
-**Environment subsystem**: Make the environment state self-describing. Use `pyproject.toml` or `package.json` to lock dependencies, `.nvmrc` or `.python-version` to specify runtime versions, and Docker or devcontainers to make the environment reproducible.
-
-**State subsystem**: Long tasks must have progress tracking. Use a simple `PROGRESS.md` file recording: what is done, what is in progress, what is blocked. Update before each session ends; read when the next session starts.
-
-**Feedback subsystem**: This is the highest-ROI subsystem. Explicitly list verification commands in `AGENTS.md`:
+1. **指示サブシステム**: `AGENTS.md`（または `CLAUDE.md`）を作る。プロジェクト概要と目的、技術スタックとバージョン、初回実行コマンド、譲れないハード制約、詳細ドキュメントへのリンクを含める
+2. **ツールサブシステム**: 十分なツールアクセスを確保する。「セキュリティのため」とシェルを無効化してはいけない——`pip install` すらできないエージェントに何ができるのか。ただし全開放もせず、最小権限の原則に従う
+3. **環境サブシステム**: 環境状態を自己記述的にする。`pyproject.toml` や `package.json` で依存を固定し、`.nvmrc` や `.python-version` でランタイムバージョンを指定し、Docker や devcontainer で環境を再現可能にする
+4. **状態サブシステム**: 長タスクには進捗トラッキングが必須。シンプルな `PROGRESS.md` に「完了したこと・進行中のこと・ブロックされていること」を記録する。各セッション終了前に更新し、次セッション開始時に読む
+5. **フィードバックサブシステム**: 最もROIが高いサブシステム。検証コマンドを AGENTS.md に明示する
 
 ```
-Verification commands:
-- Tests: pytest tests/ -x
-- Type check: mypy src/ --strict
+検証コマンド:
+- テスト: pytest tests/ -x
+- 型検査: mypy src/ --strict
 - Lint: ruff check src/
-- Full verification: make check (includes all above)
+- フル検証: make check（上記すべてを含む）
 ```
 
-Missing any one of the five subsystems means an incomplete harness, and the agent will always feel awkward to use.
+5つのうちどれが欠けてもハーネスは不完全で、エージェントは常にどこかぎこちなくなる。
 
-**Quantifying harness component value**: Use a "controlled variable exclusion test." Keep the model fixed, remove the five subsystems one at a time, and see which subsystem's removal causes the biggest performance drop. The component with the largest drop has the highest marginal contribution for the current task and is worth prioritizing. Whether to strengthen it depends on failure attribution, not just the size of the drop. Components with near-zero impact should not be dismissed outright: they may be redundant, poorly designed, or simply not exercised by the current task. This experiment answers "which component is most valuable right now" — it cannot, by itself, prove "where the bottleneck is." To truly locate a bottleneck, you must first examine failure records and attributions: was the task unclear, was context insufficient, was the environment unreproducible, was verification feedback missing, or was state management broken? Component ablation results can only serve as supporting evidence.
+**ハーネス部品の価値の定量化**: 「変数統制の除去テスト」を使う。モデルを固定し、5サブシステムを1つずつ外して、どのサブシステムの除去が最も性能を落とすかを見る。落差が最大の部品が現在のタスクにおける限界貢献最大であり、優先投資の候補になる。ただし注意点が2つある。影響ほぼゼロの部品も即座に切り捨ててはいけない——冗長なのか、設計が悪いのか、今のタスクで使われていないだけなのか区別できないからだ。そしてこの実験が答えられるのは「今どの部品が最も価値があるか」までで、「ボトルネックがどこか」は単独では証明できない。本当のボトルネック特定には、失敗記録と帰属分析（タスクが不明確だったか、コンテキスト不足か、環境が再現不能か、検証フィードバック欠如か、状態管理破綻か）が先に必要で、除去テストの結果は補強証拠にしかならない。
 
-## A Team's Real Story
+## あるチームの実話
 
-A team used GPT-4o to develop a TypeScript + React frontend application (~20,000 lines of code). They went through four stages, which were essentially adding harness components one at a time:
+あるチームが GPT-4o で TypeScript + React のフロントエンドアプリ（約20,000行）を開発した。4段階を経たが、これは実質的にハーネス部品を1つずつ追加していく過程だった。
 
-**Stage 1**: Only a basic project description in the README. 1 out of 5 runs succeeded (20%). Main failures: chose the wrong package manager (npm vs yarn), did not follow component naming conventions, could not run tests.
+- **段階1**: READMEに基本的なプロジェクト説明のみ。5回中1回成功（20%）。主な失敗: パッケージマネージャの取り違え（npm vs yarn）、コンポーネント命名規約違反、テスト実行不能
+- **段階2**: AGENTS.md を追加し、技術スタックのバージョン・命名規約・主要なアーキテクチャ決定を明記。成功率60%に上昇。残る失敗は主に環境問題と検証欠如
+- **段階3**: AGENTS.md に検証コマンド `yarn test && yarn lint && yarn build` を明記。成功率80%に上昇
+- **段階4**: 進捗ファイルのテンプレートを導入し、エージェントが毎回完了・未完了の作業を記録。成功率80〜100%で安定
 
-**Stage 2**: Added `AGENTS.md` specifying tech stack versions, naming conventions, and key architecture decisions. Success rate rose to 60%. Remaining failures were mainly from environment issues and missing verification.
+4回の反復でモデルは一切変えず、成功率は20%からほぼ100%へ。変わったのはハーネスである。
 
-**Stage 3**: Listed verification commands in `AGENTS.md`: `yarn test && yarn lint && yarn build`. Success rate rose to 80%.
+## 要点
 
-**Stage 4**: Introduced progress file templates where the agent recorded completed and incomplete work each run. Success rate stabilized at 80-100%.
+- ハーネス = 指示 + ツール + 環境 + 状態 + フィードバック。5サブシステムすべてが必須
+- モデルの重みでなければそれはハーネス。ハーネスがモデル能力の発揮率を決める
+- 5つの中ではフィードバックサブシステムが通常、最小投資・最大リターン。まず検証コマンドを整える
+- 「変数統制の除去テスト」で各サブシステムの限界貢献を定量化する。ただし真のボトルネック特定は失敗記録と帰属分析に依拠し、除去テスト単独に頼らない
+- ハーネスもコードと同様に腐る。定期監査し、技術的負債と同じように「ハーネス負債」を返済する
 
-Four iterations, the model did not change at all, and success rate went from 20% to near 100%. You did not switch to a better model — what changed was the harness.
+## 演習
 
-## Key Takeaways
+1. **5要素ハーネス監査**: 現在AIエージェントを使っているプロジェクトを5サブシステムの枠組みで監査し、各サブシステムを1〜5点で採点。最低点のサブシステムに30分投資して改善し、エージェントの性能変化を観察する
+2. **変数統制の除去テスト**: モデル1つと難しめのタスク1つを選び、指示の除去（AGENTS.md削除）・フィードバックの除去（検証コマンド非提供）・状態の除去（進捗ファイルなし）を1つずつ行い、性能低下を測定。結果から現在のタスクにおける各サブシステムの限界価値を順位付けする。ボトルネックを探すなら、除去テストと並行して失敗ログと原因帰属も記録する
+3. **アフォーダンス分析**: 「エージェントがやりたくてもできない」場面（例: パラメータ化クエリを使うべきと知っているが、プロジェクトのORMパターンを知らない）を見つけ、それが実行の谷（操作方法がわからない）か評価の谷（正しくできたかわからない）かを分析し、その谷を埋めるハーネス改善を設計する
 
-- Harness = Instructions + Tools + Environment + State + Feedback. All five subsystems are essential.
-- If it is not model weights, it is harness. Your harness determines how much of the model's capability gets realized.
-- Among the five subsystems, the feedback subsystem usually has the lowest investment and highest return. Get your verification commands right first.
-- Use "controlled variable exclusion tests" to quantify each subsystem's marginal contribution; to locate the real bottleneck, rely on failure records and attribution, not ablation alone.
-- Harness rots like code does. Audit regularly, and pay down harness debt just like you pay down technical debt.
-
-## Further Reading
+## 参考文献
 
 - [OpenAI: Harness Engineering](https://openai.com/index/harness-engineering/)
 - [Anthropic: Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
@@ -88,8 +84,6 @@ Four iterations, the model did not change at all, and success rate went from 20%
 - [SWE-agent: Agent-Computer Interfaces](https://github.com/princeton-nlp/SWE-agent)
 - [Thoughtworks: Harness Engineering on Technology Radar](https://www.thoughtworks.com/radar)
 
-## Exercises
+---
 
-1. **Five-tuple harness audit**: Take a project where you currently use an AI agent and do a complete audit using the five-tuple framework. Score each subsystem 1-5. Find the lowest-scoring subsystem, spend 30 minutes improving it, and then observe the change in agent performance.
-2. **Controlled variable exclusion test**: Pick one model and one challenging task. Sequentially remove instructions (delete AGENTS.md), remove feedback (do not provide verification commands), remove state (no progress files) — removing only one at a time, and measure the performance drop. Use the results to rank each subsystem's marginal value for the current task. If you want to find the bottleneck, you must also record failure logs and do root-cause attribution alongside the ablation.
-3. **Affordance analysis**: Find a scenario in your project where the agent "wants to do something but can't" (e.g., knows it should use parameterized queries but does not know your project's ORM patterns). Analyze whether this is a Gulf of Execution (does not know how to operate) or a Gulf of Evaluation (does not know whether it did things right), then design a harness improvement to bridge the gap.
+出典: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-02-what-a-harness-actually-is/

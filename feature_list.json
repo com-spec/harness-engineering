@@ -141,6 +141,20 @@
       "evidence": [
         "Session 002 (2026-06-11): 5講分（06-initialization-phase, 07-scope-control, 09-early-victory, 10-e2e-testing, 11-observability）を日本語要約で作成。ls で全12講の存在、tail で出典URL記載を確認。"
       ]
+    },
+    {
+      "id": "lecture-japanese-translation",
+      "name": "既存レクチャー8件の日本語化（00-05, 08, 12）",
+      "status": "passing",
+      "priority": 6,
+      "description": "英語原文の全文転載だった既存8ファイルを、補完済み5講と同じスタイルの日本語版に置き換える。原文は git 履歴で参照可能。",
+      "verification": [
+        "docs/harness-course/ の全13ファイル（00-12）が日本語である",
+        "各ファイルに出典URLが明記されている"
+      ],
+      "evidence": [
+        "Session 002 (2026-06-11): 8ファイルを情報を落とさない詳細日本語版に書き換え（専門用語に初出補足付き）。head で日本語見出し、grep で出典URL記載を全8件確認。原文は初回コミット 1d5c22c で参照可能。"
+      ]
     }
   ]
 }

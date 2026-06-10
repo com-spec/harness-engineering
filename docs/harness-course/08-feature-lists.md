@@ -1,58 +1,60 @@
-[中文版 →](https://walkinglabs.github.io/learn-harness-engineering/zh/lectures/lecture-08-why-feature-lists-are-harness-primitives/)
+# Lecture 08: なぜ feature list はハーネスのプリミティブなのか
 
-> Code examples: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/code/) Practice project: [Project 04. Runtime feedback and scope control](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-04-incremental-indexing/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/code/) 実践プロジェクト: [Project 04. Runtime feedback and scope control](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-04-incremental-indexing/)
 
-You ask an agent to build an e-commerce site. After it finishes, it tells you "done." You look at the code — user authentication works, but the checkout button in the shopping cart does nothing, and the payment flow isn't connected at all. Where did things go wrong? You never told it what "done" means, so it used its own standard: "I wrote a lot of code and it looks fairly complete."
+エージェントにECサイトの構築を頼み、「完了」と報告される。コードを見ると、ユーザー認証は動くが、カートのチェックアウトボタンは何も反応せず、決済フローはそもそも繋がっていない。何が悪かったのか？「完了」の意味を伝えなかったため、エージェントは自前の基準——「たくさんコードを書いたし、だいたい揃って見える」——を使ったのである。
 
-Feature lists, in many people's eyes, are just a memo — write things down so you don't forget, then toss them aside. But in the harness world, a feature list isn't a memo for humans. It's the foundational structure the entire harness is built on. The scheduler relies on it to pick tasks, the verifier relies on it to judge completion, and the handoff reporter relies on it to generate summaries. Without it, these components have no shared consensus to depend on.
+feature list（機能リスト）は多くの人にとって単なるメモ——忘れないように書き出して、あとは放置するもの——に見える。だがハーネスの世界では、feature list は人間向けのメモではなく、**ハーネス全体がその上に構築される基盤データ構造（プリミティブ）** である。スケジューラはそれを頼りにタスクを選び、検証器はそれを頼りに完了を判定し、ハンドオフレポーターはそれを頼りにサマリーを生成する。これがなければ、各部品が依拠できる共通の合意が存在しない。
 
-Both Anthropic and OpenAI emphasize: **artifacts must be externalized.** Feature state must live in a machine-readable file in the repo, not in unstructured conversation text.
+AnthropicもOpenAIも強調する: **成果物は外部化せよ。** 機能の状態は会話の非構造化テキストではなく、リポジトリ内の機械可読ファイルに置かなければならない。
 
-## Agents Don't Know What "Done" Means
+## エージェントは「完了」の意味を知らない
 
-Neither Claude Code nor Codex automatically knows what you mean by "done." You say "add a shopping cart feature," and the model's interpretation might be "write a Cart component and an addToCart method." But you meant "the user can browse products, add to cart, and complete checkout end-to-end."
+Claude Code も Codex も、あなたの言う「完了」を自動的には知らない。「カート機能を追加して」と言えば、モデルの解釈は「Cart コンポーネントと addToCart メソッドを書く」かもしれない。だがあなたの意図は「ユーザーが商品を閲覧し、カートに入れ、チェックアウトまでエンドツーエンドで完了できる」だった。
 
-This understanding gap persists without a feature list. The agent uses its own implicit standard — usually "the code has no obvious syntax errors." What you need is end-to-end behavioral verification. Without a list, the two sides will never agree on what "done" means.
+feature list がない限り、この理解ギャップは残り続ける。エージェントは自前の暗黙基準——通常は「コードに明らかな構文エラーがない」——を使う。あなたが必要なのはエンドツーエンドの振る舞い検証。リストなしでは、両者が「完了」の意味で合意することは永遠にない。
 
-Look at this common progress note:
+よくある進捗メモを見てほしい:
 
 ```
-Did user auth, shopping cart mostly done, still need payments
+ユーザー認証はやった、カートはだいたいできてる、決済はまだ
 ```
 
-Can a new agent session answer these questions from this note? What does "mostly done" mean? Which tests did the cart pass? What's blocking payments? The answer to all is "nobody knows."
+新しいエージェントセッションはこのメモから何が分かるか？「だいたいできてる」とは？カートはどのテストを通った？決済は何にブロックされている？答えはすべて「誰にも分からない」。
 
-The result: the new session spends 20 minutes inferring project state, and may end up re-implementing completed features. Anthropic's engineering data shows that good progress records reduce session startup diagnostic time by 60-80%.
+結果、新セッションはプロジェクト状態の推測に20分を費やし、完了済み機能を再実装しかねない。Anthropicのエンジニアリングデータでは、良い進捗記録はセッション開始時の診断時間を60〜80%削減する。
 
-## Feature State Machine
+## 機能のステートマシン
 
-## Core Concepts
+各機能項目は4状態のステートマシン（状態遷移機械: 取りうる状態と遷移ルールを限定する仕組み）として管理する。
 
-- **Feature lists are harness primitives**: Not "optional planning tools," but foundational data structures that all other harness components depend on. The scheduler, verifier, and handoff reporter all need to read the feature list to function.
-- **Triple structure**: Each feature item contains three elements: `(behavior description, verification command, current state)`. The behavior tells the agent what to do, the verification tells it what counts as done, and the state tells it where things stand. Missing any element makes the item incomplete.
-- **State machine model**: Each feature item has four states — `not_started`, `active`, `blocked`, `passing`. State transitions are controlled by the harness, not freely changed by the agent.
-- **Pass-state gating**: The only way a feature moves from `active` to `passing` is by the verification command executing successfully. This transition is irreversible — once `passing`, it can't go back.
-- **Single source of truth**: All information about "what needs to be done" must derive from one feature list. No contradictions between the feature list and conversation history.
-- **Back-pressure**: The number of features that haven't passed yet is the pressure the harness exerts on the agent. Zero pressure = project complete.
+## 核心概念
 
-## Why Feature Lists Must Be "Primitives"
+- **feature list はハーネスのプリミティブ**: 「あってもいい計画ツール」ではなく、他のすべてのハーネス部品が依存する基盤データ構造。スケジューラ・検証器・ハンドオフレポーターはすべて feature list を読んで初めて機能する
+- **3要素構造（Triple）**: 各機能項目は3要素を持つ: `(振る舞いの記述, 検証コマンド, 現在の状態)`。振る舞いは「何をするか」、検証は「何をもって完了とするか」、状態は「今どこにいるか」を伝える。どれか欠ければ項目として不完全
+- **ステートマシンモデル**: 各機能項目は4状態——`not_started`（未着手）、`active`（作業中）、`blocked`（ブロック中）、`passing`（検証合格）——を持つ。状態遷移はハーネスが制御し、エージェントが自由に書き換えてはいけない
+- **合格状態のゲーティング（Pass-state Gating）**: `active` から `passing` への唯一の道は検証コマンドの成功実行。この遷移は不可逆——一度 `passing` になったら戻らない
+- **唯一の真実の源（SSOT: Single Source of Truth、唯一の正となる情報源）**: 「何をやるべきか」の情報はすべて1つの feature list から導出する。feature list と会話履歴の間に矛盾を作らない
+- **バックプレッシャー（Back-pressure）**: まだ合格していない機能の数が、ハーネスがエージェントにかける圧力。圧力ゼロ = プロジェクト完了
 
-Documents are for humans to read; primitives are for systems to execute. Documents can be ignored; primitives can't be bypassed.
+## なぜ「プリミティブ」でなければならないのか
 
-Think of it like database trigger constraints versus application-layer checks: the former is enforced by the database engine — no SQL can skip it. The latter depends on application code correctness and can be accidentally bypassed. Feature lists as harness primitives play the same role as database-level constraints — the agent cannot bypass them.
+ドキュメントは人間が読むもの、プリミティブはシステムが実行するもの。ドキュメントは無視できるが、プリミティブは迂回できない。
 
-Specifically, the feature list serves four harness components:
+データベースのトリガー制約とアプリケーション層のチェックの違いに似ている。前者はデータベースエンジンが強制し、どんなSQLも飛ばせない。後者はアプリコードの正しさに依存し、うっかり迂回されうる。ハーネスのプリミティブとしての feature list は、データベースレベルの制約と同じ役割を果たす——エージェントは迂回できない。
 
-1. **Scheduler**: Reads states, picks the next `not_started` feature.
-2. **Verifier**: Executes verification commands, decides whether to allow state transitions.
-3. **Handoff reporter**: Automatically generates session handoff summaries from the feature list.
-4. **Progress tracker**: Tallies state distribution, provides project health metrics.
+具体的には、feature list は4つのハーネス部品に仕える:
 
-## How to Do It
+1. **スケジューラ**: 状態を読み、次の `not_started` 機能を選ぶ
+2. **検証器**: 検証コマンドを実行し、状態遷移を許可するか判定する
+3. **ハンドオフレポーター**: feature list からセッション引き継ぎサマリーを自動生成する
+4. **進捗トラッカー**: 状態分布を集計し、プロジェクトの健全性メトリクスを提供する
 
-### 1\. Define a Minimal Feature List Format
+## 実践方法
 
-You don't need a complex system — a structured Markdown or JSON file works. The key is every entry must have the triple:
+### 1. 最小の feature list フォーマットを定義する
+
+複雑なシステムは不要——構造化された Markdown か JSON のファイルで足りる。鍵はすべてのエントリが3要素を持つこと:
 
 ```json
 {
@@ -64,51 +66,54 @@ You don't need a complex system — a structured Markdown or JSON file works. Th
 }
 ```
 
-### 2\. Let the Harness Control State Transitions
+### 2. 状態遷移はハーネスに制御させる
 
-The agent can't directly change a feature's state to `passing`. It can only submit a verification request. The harness executes the verification command and decides whether to allow the transition. This is "pass-state gating."
+エージェントは機能の状態を直接 `passing` に書き換えられない。できるのは検証リクエストの提出だけ。ハーネスが検証コマンドを実行し、遷移を許可するか決める。これが「合格状態のゲーティング」である。
 
-### 3\. Write the Rules in CLAUDE.md
+### 3. ルールを CLAUDE.md に書く
 
 ```
-## Feature List Rules
-- Feature list file: /docs/features.md
-- Only one feature active at a time
-- Verification command must pass before marking as passing
-- Don't modify feature list states yourself — the verification script updates them automatically
+## Feature List ルール
+- feature list ファイル: /docs/features.md
+- 同時に active にできる機能は1つだけ
+- passing にする前に検証コマンドの合格が必須
+- feature list の状態を自分で書き換えない——検証スクリプトが自動更新する
 ```
 
-### 4\. Calibrate Granularity
+### 4. 粒度を調整する
 
-Each feature item should be scoped to "completable in one session." Too broad and it won't finish; too narrow and the management overhead grows. "User can add items to cart" is good granularity. "Implement the shopping cart" is too broad. "Create the name field on the Cart model" is too narrow.
+各機能項目は「1セッションで完了できる」サイズにする。広すぎると終わらず、狭すぎると管理オーバーヘッドが増える。「ユーザーが商品をカートに追加できる」は良い粒度。「ショッピングカートを実装する」は広すぎる。「Cart モデルに name フィールドを作る」は狭すぎる。
 
-## Real-World Case
+## 実例
 
-An e-commerce platform with 10 features. Two tracking approaches compared:
+10機能のECプラットフォームで、2つの進捗管理方式を比較した。
 
-**Memo mode**: The agent uses unstructured notes to track progress. After 3 sessions, the notes become "did user auth and product list, shopping cart mostly done but has bugs, payments not started." A new session needs 20 minutes to infer state, and ultimately re-implements completed features.
+- **メモ方式**: エージェントが非構造化メモで進捗を管理。3セッション後、メモは「ユーザー認証と商品一覧はやった、カートはだいたいできてるがバグあり、決済は未着手」になった。新セッションは状態の推測に20分を要し、最終的に完了済み機能を再実装した
+- **構造化方式**: すべての機能に明確な状態と検証コマンドがある。新セッションは feature list を読み、3分で把握: F01〜F05 は `passing`、F06 は `active`（作業中）、F07〜F10 は `not_started`。F06 から直接再開し、手戻りゼロ
 
-**Structured mode**: Every feature has a clear state and verification command. A new session reads the feature list and in 3 minutes knows: F01-F05 are `passing`, F06 is `active` (in progress), F07-F10 are `not_started`. It picks up directly from F06, with zero rework.
+定量結果: 構造化 feature list を使ったプロジェクトは自由形式の管理より機能完成率が45%高く、重複実装はゼロだった。
 
-Quantified result: projects using structured feature lists show 45% higher feature completion rate than free-form tracking, with zero duplicate implementations.
+## 要点
 
-## Key Takeaways
+- **feature list はハーネスの基盤構造**であり、人間向けのメモではない。スケジューラ・検証器・ハンドオフレポーターがすべてこれに依存する
+- **すべての機能項目は3要素を持つ**: 振る舞いの記述 + 検証コマンド + 現在の状態。1つ欠ければ不完全
+- **状態遷移はハーネスが制御する**——エージェントは勝手に状態を変えられない。検証合格が唯一の昇格経路
+- **feature list はプロジェクトのSSOT**——「何をやるか」の情報はすべてここから導出する
+- **粒度は「1セッションで完了できる」に合わせる**。広すぎると終わらず、狭すぎると管理できない
 
-- **Feature lists are the harness's foundational structure**, not memos for humans. The scheduler, verifier, and handoff reporter all depend on them.
-- **Every feature item must have the triple**: behavior description + verification command + current state. Missing one element makes it incomplete.
-- **State transitions are controlled by the harness** — the agent can't change states on its own. Passing verification is the only upgrade path.
-- **The feature list is the project's single source of truth** — all "what to do" information derives from it.
-- **Calibrate granularity to "completable in one session."** Too broad and it won't finish; too narrow and you can't manage it.
+## 演習
 
-## Further Reading
+1. **feature list 設計**: 最小の feature list JSONスキーマを定義する。含めるもの: id、振る舞いの記述、検証コマンド、現在の状態、証拠への参照。これで実プロジェクトの5機能を記述する
+2. **検証の厳しさ比較**: 機能を3つ選び、「緩い」検証（例: コードに構文エラーがない）と「厳しい」検証（例: エンドツーエンドテスト合格）の両方を設計する。それぞれの偽陽性率（実際は未完成なのに完了と判定される率）を比較する
+3. **SSOT原則の監査**: 既存のエージェントプロジェクトを見直し、feature list と矛盾するスコープ情報（会話内の暗黙の要件、コード内のTODOコメント等）を洗い出す。すべての情報を feature list に一元化する計画を設計する
 
-- [Building Effective Agents - Anthropic](https://www.anthropic.com/research/building-effective-agents) — Explicitly identifies feature list as the "core data structure" for controlling agent scope
-- [Harness Engineering - OpenAI](https://openai.com/index/harness-engineering/) — Emphasizes the principle of "externalizing artifacts"
-- [Design by Contract - Bertrand Meyer](https://www.goodreads.com/book/show/130439.Object_Oriented_Software_Construction) — Design by contract principles, the theoretical foundation of feature lists
-- [How Google Tests Software](https://www.goodreads.com/book/show/13563030-how-google-tests-software) — Test pyramid and behavioral specification engineering practices
+## 参考文献
 
-## Exercises
+- [Building Effective Agents - Anthropic](https://www.anthropic.com/research/building-effective-agents) — feature list をエージェントのスコープ制御の「中核データ構造」と明確に位置づける
+- [Harness Engineering - OpenAI](https://openai.com/index/harness-engineering/) — 「成果物の外部化」原則を強調
+- [Design by Contract - Bertrand Meyer](https://www.goodreads.com/book/show/130439.Object_Oriented_Software_Construction) — 契約による設計。feature list の理論的基盤
+- [How Google Tests Software](https://www.goodreads.com/book/show/13563030-how-google-tests-software) — テストピラミッドと振る舞い仕様のエンジニアリング実践
 
-1. **Feature List Design**: Define a minimal feature list JSON schema. Include: id, behavior description, verification command, current state, evidence reference. Use it to describe a real project with 5 features.
-2. **Verification Strictness Comparison**: Pick 3 features and design both a "loose" verification (e.g., "code has no syntax errors") and a "strict" verification (e.g., "end-to-end test passes"). Compare false positive rates under each approach.
-3. **Single Source Principle Audit**: Review an existing agent project and check for scope information that contradicts the feature list (implicit requirements in conversations, TODO comments in code, etc.). Design a plan to unify all information into the feature list.
+---
+
+出典: https://walkinglabs.github.io/learn-harness-engineering/en/lectures/lecture-08-why-feature-lists-are-harness-primitives/
