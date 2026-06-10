@@ -117,14 +117,16 @@
     {
       "id": "agents-md-quality",
       "name": "AGENTS.md の品質向上（コーステンプレ突き合わせ）",
-      "status": "not_started",
+      "status": "passing",
       "priority": 4,
       "description": "コースのテンプレート・レクチャーと現 AGENTS.md を突き合わせ、不足しているハーネス原則（初期化フェーズ、観測可能性、E2E検証など）を反映する。",
       "verification": [
         "コーステンプレとの差分分析が docs に記録されている",
         "AGENTS.md に不足原則が反映され、sync-agents.sh で同期済み"
       ],
-      "evidence": []
+      "evidence": [
+        "Session 002 (2026-06-11): docs/agents-md-gap-analysis.md に8項目の差分分析を記録。AGENTS.md にスコープ規律・完了の定義・検証レベル・標準検証コマンド・セッション終了手順を追加。./sync-agents.sh 実行し diff 検証成功（~/.grok/AGENTS.md 同期済み、バックアップ作成済み）。"
+      ]
     },
     {
       "id": "lecture-completion",

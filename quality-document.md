@@ -16,7 +16,7 @@
 
 | 構成要素 | Grade | 検証方法 | 既知のギャップ | 最終更新 |
 |---|---|---|---|---|
-| AGENTS.md（正本） | B | read + コーステンプレ突き合わせ | WIP=1・完了の定義・E2E検証レベル等の原則が未反映（agents-md-quality featureで対応中） | 2026-06-11 |
+| AGENTS.md（正本） | A | read + コーステンプレ突き合わせ + sync-agents.sh diff検証 | なし（不足原則8項目を反映済み。docs/agents-md-gap-analysis.md 参照） | 2026-06-11 |
 | sync-agents.sh | A | 実行（backup+copy+diff） | Claude Code側（CLAUDE.md）の同期は未対応 | 2026-06-11 |
 | feature_list.json | A | python3 -m json.tool + evidence確認 | なし | 2026-06-11 |
 | claude-progress.md | A | read（Verified State / Session Log確認） | なし | 2026-06-11 |
