@@ -74,7 +74,7 @@
     {
       "id": "consistency-fixes",
       "name": "リポジトリ整合性修正",
-      "status": "not_started",
+      "status": "passing",
       "priority": 1,
       "description": "docs/README.md の typo 修正、README.md の progress.md 表記と sync スクリプト予定記載を実態（claude-progress.md / sync-agents.sh 済み）に合わせる。初回 git コミットを含む。",
       "verification": [
@@ -82,7 +82,9 @@
         "README.md の記載がリポジトリの実体と一致している",
         "git log に初回コミットが存在する"
       ],
-      "evidence": []
+      "evidence": [
+        "Session 002 (2026-06-11): docs/README.md typo修正、README.md の sync 記載・progress 表記を実態に更新、sync-agents.sh に実行権限付与（chmod +x）。初回コミット 1d5c22c を git log で確認。"
+      ]
     },
     {
       "id": "quality-document",

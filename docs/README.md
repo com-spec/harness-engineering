@@ -4,6 +4,6 @@
 
 ## 関連
 - Learn Harness Engineering: https://walkinglabs.github.io/learn-harness-engineering/en/
-- このリポ自体がハーネス改善のPプロジェクトとして機能する。
+- このリポ自体がハーネス改善のプロジェクトとして機能する。
 
 初期: 2026年時点でコース学習 + Grok Build 最適化を開始。

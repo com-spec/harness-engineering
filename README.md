@@ -9,7 +9,7 @@
 
 ## 現在のライブハーネスとの関係
 - このリポジトリの `AGENTS.md` が canonical（正本）。
-- 実運用では以下に同期して使用（手動コピー or 後でスクリプト化予定）:
+- 実運用では以下に同期して使用（`sync-agents.sh` で同期）:
   - Grok Build: `~/.grok/AGENTS.md`
   - Claude Code: `~/.claude/CLAUDE.md` またはプロジェクト内の CLAUDE.md
 - 変更時はこのリポで編集 → 該当エージェントの設定場所に反映。
@@ -19,7 +19,8 @@
 - skills/: カスタムスキル（grill-me など計画検証用、複数のエージェントで共有）
 - templates/: 再利用テンプレート（feature_list, progress, agent-specific rules など）
 - docs/: ハーネス改善の学び・実験記録
-- feature_list.json / progress.md: このリポ自身の改善タスク管理（コース準拠）
+- feature_list.json / claude-progress.md: このリポ自身の改善タスク管理（コース準拠）
+- sync-agents.sh: AGENTS.md をライブハーネスへ同期するスクリプト（backup + copy + verify）
 
 ## 使い方
 1. 新しい計画や機能追加時は `skills/grill-me` を活用して解像度を上げる。
@@ -28,8 +29,8 @@
 
 参考: https://walkinglabs.github.io/learn-harness-engineering/en/
 
-## 同期方法（暫定）
-- 手動: このリポの AGENTS.md を `cp` で ~/.grok/AGENTS.md に上書き。
-- 将来的: 簡単な sync スクリプトを追加予定。
+## 同期方法
+- リポルートで `./sync-agents.sh` を実行（バックアップ → コピー → diff 検証）。
+- 手動フォールバック: `cp AGENTS.md ~/.grok/AGENTS.md` 後に `head -5` で確認。
 
 初期セットアップ: 2026年時点の .grok/AGENTS.md をベースに、マルチエージェント対応に一般化して開始。
