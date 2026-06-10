@@ -103,14 +103,16 @@
     {
       "id": "templates-pack",
       "name": "templates/ のコース準拠整備",
-      "status": "not_started",
+      "status": "passing",
       "priority": 3,
       "description": "コースの resources/templates を参考に、新規プロジェクトへコピーして使える AGENTS.md / feature_list.json / claude-progress.md のテンプレートパックを templates/ に作成する。",
       "verification": [
         "templates/ に3テンプレートが存在する",
         "README.md の templates/ 記載と実体が一致している"
       ],
-      "evidence": []
+      "evidence": [
+        "Session 002 (2026-06-11): コースのミニマルパック（AGENTS.md / feature_list.json / claude-progress.md）を templates/ に収録し、日本語READMEでコピー手順を記載。feature_list.json は json.tool で妥当性検証済み。"
+      ]
     },
     {
       "id": "agents-md-quality",
@@ -127,14 +129,16 @@
     {
       "id": "lecture-completion",
       "name": "欠落レクチャーの補完（06, 07, 09, 10, 11）",
-      "status": "not_started",
+      "status": "passing",
       "priority": 5,
       "description": "コースサイトの全12講のうち docs/harness-course に未収録の5講分を取得・要約して追加する。",
       "verification": [
         "docs/harness-course/ に 06, 07, 09, 10, 11 のファイルが存在する",
         "各ファイルに出典URLが明記されている"
       ],
-      "evidence": []
+      "evidence": [
+        "Session 002 (2026-06-11): 5講分（06-initialization-phase, 07-scope-control, 09-early-victory, 10-e2e-testing, 11-observability）を日本語要約で作成。ls で全12講の存在、tail で出典URL記載を確認。"
+      ]
     }
   ]
 }
