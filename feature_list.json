@@ -89,14 +89,16 @@
     {
       "id": "quality-document",
       "name": "quality-document の導入",
-      "status": "in_progress",
+      "status": "passing",
       "priority": 2,
       "description": "quality-document.md を導入し、定期的に品質スナップショットを更新・記録する。",
       "verification": [
         "quality-document.md が存在し、内容が更新されている",
         "claude-progress.md や feature_list に品質情報が記録されている"
       ],
-      "evidence": []
+      "evidence": [
+        "Session 002 (2026-06-11): コースの QUALITY_SCORE.md 概念（A-D採点・構成要素別テーブル・ベンチマーク・簡素化ログ）をこのリポ向けに適用した quality-document.md を作成。全構成要素の初回採点を記録。"
+      ]
     },
     {
       "id": "templates-pack",
