@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+
+# Temporary
+*.tmp
+*.log
+
+# Do not ignore the actual harness files
+# (AGENTS.md, skills/ etc. are the content of this repo)

@@ -1,0 +1,136 @@
+{
+  "features": [
+    {
+      "id": "harness-repo-setup",
+      "name": "harness-engineering リポジトリ初期構築",
+      "status": "done",
+      "description": "専用リポ作成、AGENTS.md シード、grill-me スキル配置、README 記載"
+    },
+    {
+      "id": "grill-me-integration",
+      "name": "grill-me を計画ゲートとして AGENTS.md に統合",
+      "status": "passing",
+      "description": "Grok Build / Claude Code など複数エージェントで新しい計画開始時に必ず起動するルールを追加",
+      "verification": [
+        "このgrill-meセッションで完了定義（b: SKILL.md更新, c: セッション実践と記録, d: feature_listをprimitiveに近づけ）に合意した",
+        "feature_list.jsonの該当項目にverification配列とevidenceを追記しstatusをpassingに更新した"
+      ],
+      "evidence": [
+        "本セッション: ユーザーがおすすめに同意（verification定義B、変更1ファイルのみ）。grill-me-integration完了。"
+      ]
+    },
+    {
+      "id": "sync-mechanism",
+      "name": "リポと ~/.grok/ の同期方法確立",
+      "status": "passing",
+      "description": "手動コピー or 簡単スクリプト。安全にライブハーネスを更新できるようにする",
+      "verification": [
+        "sync procedure (manual) documented in claude-progress.md",
+        "actual cp AGENTS.md ~/.grok/AGENTS.md executed and verified with head in this session"
+      ],
+      "evidence": [
+        "本セッション: ユーザーがおすすめに同意。manual sync steps documented in claude-progress.md and executed. sync-mechanism 初期実装完了。"
+      ]
+    },
+    {
+      "id": "progress-tracking",
+      "name": "ハーネス改善用の progress 記録体制",
+      "status": "passing",
+      "description": "progress.md または同等でセッションごとの状態を残す",
+      "verification": [
+        "claude-progress.md を course テンプレートベースで新規作成・初期記録した",
+        "feature_list.json に verification と evidence を追記し status を passing に更新した"
+      ],
+      "evidence": [
+        "本セッション: ユーザーがおすすめに同意。claude-progress.md 作成完了、初回 Session 001 記録。progress-tracking 初期体制確立。"
+      ]
+    },
+    {
+      "id": "sync-script",
+      "name": "sync-agents.sh の作成（手動同期のスクリプト化）",
+      "status": "passing",
+      "description": "sync-agents.sh を作成し、手動 cp をスクリプト化。backup + copy + verify を含む。",
+      "verification": [
+        "sync-agents.sh がルートに存在し、実行可能",
+        "実行して AGENTS.md が同期され、バックアップと検証が機能すること"
+      ],
+      "evidence": [
+        "本セッション: ユーザーがおすすめに同意。スクリプト内容確認済み。sync-agents.sh を作成。"
+      ]
+    },
+    {
+      "id": "clean-state-checklist",
+      "name": "clean-state-checklist の本格適用",
+      "status": "passing",
+      "description": "clean-state-checklist をAGENTS.mdのStartup Workflowとclaude-progress.mdに統合し、セッション終了時のclean stateを強制する。",
+      "verification": [
+        "Startup Workflowに具体的なチェックリスト項目が追加されている",
+        "claude-progress.mdの各セッション終了時にチェックリスト実行と記録がされている"
+      ],
+      "evidence": [
+        "本セッション: ユーザーがおすすめに同意。clean-state-checklist.md 作成、AGENTS.mdとclaude-progress.mdに統合。"
+      ]
+    },
+    {
+      "id": "consistency-fixes",
+      "name": "リポジトリ整合性修正",
+      "status": "not_started",
+      "priority": 1,
+      "description": "docs/README.md の typo 修正、README.md の progress.md 表記と sync スクリプト予定記載を実態（claude-progress.md / sync-agents.sh 済み）に合わせる。初回 git コミットを含む。",
+      "verification": [
+        "docs/README.md に typo がない",
+        "README.md の記載がリポジトリの実体と一致している",
+        "git log に初回コミットが存在する"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "quality-document",
+      "name": "quality-document の導入",
+      "status": "in_progress",
+      "priority": 2,
+      "description": "quality-document.md を導入し、定期的に品質スナップショットを更新・記録する。",
+      "verification": [
+        "quality-document.md が存在し、内容が更新されている",
+        "claude-progress.md や feature_list に品質情報が記録されている"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "templates-pack",
+      "name": "templates/ のコース準拠整備",
+      "status": "not_started",
+      "priority": 3,
+      "description": "コースの resources/templates を参考に、新規プロジェクトへコピーして使える AGENTS.md / feature_list.json / claude-progress.md のテンプレートパックを templates/ に作成する。",
+      "verification": [
+        "templates/ に3テンプレートが存在する",
+        "README.md の templates/ 記載と実体が一致している"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "agents-md-quality",
+      "name": "AGENTS.md の品質向上（コーステンプレ突き合わせ）",
+      "status": "not_started",
+      "priority": 4,
+      "description": "コースのテンプレート・レクチャーと現 AGENTS.md を突き合わせ、不足しているハーネス原則（初期化フェーズ、観測可能性、E2E検証など）を反映する。",
+      "verification": [
+        "コーステンプレとの差分分析が docs に記録されている",
+        "AGENTS.md に不足原則が反映され、sync-agents.sh で同期済み"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "lecture-completion",
+      "name": "欠落レクチャーの補完（06, 07, 09, 10, 11）",
+      "status": "not_started",
+      "priority": 5,
+      "description": "コースサイトの全12講のうち docs/harness-course に未収録の5講分を取得・要約して追加する。",
+      "verification": [
+        "docs/harness-course/ に 06, 07, 09, 10, 11 のファイルが存在する",
+        "各ファイルに出典URLが明記されている"
+      ],
+      "evidence": []
+    }
+  ]
+}
