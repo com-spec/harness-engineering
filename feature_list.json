@@ -235,14 +235,16 @@
     {
       "id": "harness-setup-skill",
       "name": "ハーネスセットアップのSkill化（テンプレコピー＋プロジェクト用記入の自動化）",
-      "status": "not_started",
+      "status": "passing",
       "priority": 11,
-      "description": "templates/ のコピーと3つの記入（feature_listの実タスク化・progressの現在地記入・起動手順の決定）を1回の依頼で行えるSkillまたはスクリプトにする。",
+      "description": "templates/ のコピーと3つの記入（feature_listの実タスク化・progressの現在地記入・起動手順の決定）を1回の依頼で行えるSkillにする。",
       "verification": [
         "新規プロジェクトで実際に使い、コピーから記入完了まで動作すること"
       ],
-      "evidence": [],
-      "notes": "順番待ち（WIP=1ルール適用）。着手条件: x-monetizationのpost-002が投稿された後、または次の新規プロジェクト立ち上げで実際に必要になったとき。現状は『templatesをコピーしてハーネス付きで始めて』との依頼で代替可能。"
+      "evidence": [
+        "Session 007 (2026-06-11): ユーザー明示指示により順番待ちから前倒し着手。~/.claude/skills/harness-setup/SKILL.md を作成（グローバル個別管理方針に従いリポにはコピーを置かない）。/tmp の仮プロジェクトでサブエージェントによる実地テストを実行し、最小構成導入が成功（JSON妥当・3ファイル作成・既存上書きなし）。テストで出た改善フィードバック5点をSKILL.mdに反映済み。"
+      ],
+      "notes": "スキルの本体は ~/.claude/skills/harness-setup/。起動フレーズ:「ハーネス付きで始めて」「ハーネスを導入して」など。"
     }
   ]
 }
