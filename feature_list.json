@@ -215,6 +215,22 @@
       "evidence": [
         "Session 005 (2026-06-11): 最初シンボリックリンクで登録しSkill一覧への即時反映を確認したが、ユーザー要望（わかりやすさ優先）により通常のフォルダコピーに置き換え。ls -l でディレクトリ確認、head で SKILL.md 読取確認。"
       ]
+    },
+    {
+      "id": "repo-role-restructure",
+      "name": "リポ役割の再構築（グローバル設定の個別管理への移行）",
+      "status": "passing",
+      "priority": 10,
+      "description": "全プロジェクト共通ルールはこのリポで管理せず各エージェントの定位置で個別最適化する方針に転換。AGENTS.md をリポ専用作業ルールに縮小、sync-agents.sh と skills/grill-me を削除、README を新役割（教科書＋テンプレート＋実験場）に書き換え。grill-me で3論点（AGENTS.md縮小・同期廃止・grill-me削除）に合意済み。",
+      "verification": [
+        "sync-agents.sh と skills/ がリポに存在しない",
+        "AGENTS.md と README.md が新役割の記載になっている",
+        "quality-document.md の簡素化ログに削除の記録がある",
+        "標準検証コマンドが成功する"
+      ],
+      "evidence": [
+        "Session 006 (2026-06-11): grill-me Skill で3論点すべて合意。git rm で2件削除（履歴から復元可能）、AGENTS.md を約70行のリポ専用ルールに書き換え、README・clean-state-checklist・quality-document（簡素化ログ3件）を更新。検証コマンド実行済み。"
+      ]
     }
   ]
 }

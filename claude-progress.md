@@ -5,13 +5,14 @@
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
 - Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 002)
-- Sync: sync-agents.sh executed and diff-verified in Session 002 (AGENTS.md synced to ~/.grok/AGENTS.md with backup)
+- Current highest-priority unfinished feature: None (all features passing as of Session 006)
+- Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
+- Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
 - Quality snapshot: quality-document.md active (all components grade A as of 2026-06-11)
 - Current blocker: None
 
-## Sync Procedure (manual, initial)
+## Sync Procedure (廃止: Session 006 で同期方式自体を廃止。以下は歴史的記録)
 
 Manual sync steps (per grill-me agreement for sync-mechanism feature):
 
@@ -23,6 +24,31 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 006 (2026-06-11)
+
+- Date: 2026-06-11
+- Goal: リポ役割の再構築。ユーザーの方針「グローバル共通ルールはリポで管理せず個別最適化したい」を受け、grill-me Skill で計画を確定して実施。
+- Completed:
+  - grill-me で3論点に合意: AGENTS.md はリポ専用に縮小 / sync-agents.sh は削除して同期方式自体を廃止 / skills/grill-me はリポから削除（~/.claude/skills/ が唯一の本体に）
+  - AGENTS.md を全プロジェクト共通ルール込みの約140行から、このリポ専用の作業ルール約70行に書き換え
+  - sync-agents.sh と skills/ を git rm で削除（git履歴から復元可能）
+  - README.md を新役割（教科書＋テンプレート置き場＋実験場）に全面書き換え
+  - clean-state-checklist.md から sync 項目を削除
+  - quality-document.md の構成要素表を更新し、簡素化ログに削除3件を記録（初の簡素化ログ運用）
+- Verification run: python3 -m json.tool 成功。ls でリポ直下に sync-agents.sh / skills/ が無いことを確認。標準検証コマンド成功。
+- Evidence captured: feature_list.json の repo-role-restructure に記録。
+- Commits: 本セッションの再構築を1コミットに集約。
+- Known risk or unresolved issue: ~/.grok/AGENTS.md は旧リポ内容のまま個別運用に移行（今後の最適化はGrok側セッションで実施）。grill-me の本体は ~/.claude/skills/ のみになったため、誤削除に注意（git履歴 8982817 以前から復元可能）。
+- Next best step: 再構築完了。次の候補はコース Projects の実践、または templates/ を実プロジェクトで使う体験。
+
+#### Clean State Checklist (Session 006)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 005 (2026-06-11)
 

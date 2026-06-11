@@ -1,36 +1,36 @@
 # harness-engineering
 
-このリポジトリは、Grok Build、Claude Code、Cursor など複数のAI coding agent で使用するハーネスを体系的に管理・改善するための専用リポジトリです。
+ハーネスエンジニアリング（AI coding agent を確実に働かせるための環境設計）の教科書・テンプレート・実験場を兼ねるリポジトリ。
 
-## 目的
-- Learn Harness Engineering コースの原則を自分自身に適用する（repo as the spec, state管理、verification、scope制御）。
-- AGENTS.md、skills、templates を一元管理し、バージョン履歴を残す。
-- ハーネス改善自体をプロジェクトとして追跡（feature_list + progress）。
+## 役割
 
-## 現在のライブハーネスとの関係
-- このリポジトリの `AGENTS.md` が canonical（正本）。
-- 実運用では以下に同期して使用:
-  - Grok Build: `~/.grok/AGENTS.md`（`sync-agents.sh` で同期）
-  - Claude Code: `~/.claude/CLAUDE.md` またはプロジェクト内の CLAUDE.md（手動コピー。sync-agents.sh は未対応）
-- 変更時はこのリポで編集 → 該当エージェントの設定場所に反映。
+1. **教科書**: `docs/harness-course/` に Learn Harness Engineering コース全12講の日本語版を収録
+2. **テンプレート置き場**: `templates/` に新規プロジェクト用のミニマルパック（AGENTS.md / feature_list.json / claude-progress.md / init.sh）を収録。大きめのプロジェクトを始めるときにコピーして使う
+3. **実験場**: このリポ自体を feature_list / claude-progress で運用し、ハーネスの練習台にする
+
+## 管理方針（2026-06-11 改訂）
+
+全プロジェクト共通のルール（応答スタイル・禁止事項など）は、このリポでは管理しない。
+各エージェントの定位置で個別に最適化して管理する:
+
+- Claude Code: `~/.claude/CLAUDE.md`、スキルは `~/.claude/skills/`
+- Grok Build: `~/.grok/AGENTS.md`
+
+旧方式（このリポを正本として sync-agents.sh で同期）は廃止した。経緯は claude-progress.md の Session 006 と git 履歴を参照。
 
 ## 構造
-- AGENTS.md: マルチエージェント対応ハーネス指示の正本（Grok Build / Claude Code 共通で使用）
-- skills/: カスタムスキル（grill-me など計画検証用、複数のエージェントで共有）
-- templates/: コース準拠のミニマルパック（AGENTS.md / feature_list.json / claude-progress.md ＋日本語README）
-- docs/: ハーネス改善の学び・実験記録
-- feature_list.json / claude-progress.md: このリポ自身の改善タスク管理（コース準拠）
-- sync-agents.sh: AGENTS.md をライブハーネスへ同期するスクリプト（backup + copy + verify）
+
+- AGENTS.md: このリポで作業するときのルール（Startup Workflow・スコープ規律・完了の定義・検証）
+- docs/: コース日本語版と差分分析などの学習記録
+- templates/: 新規プロジェクト用テンプレートパック（使い方は templates/README.md）
+- feature_list.json / claude-progress.md: このリポ自身の改善タスク管理と進捗記録
+- quality-document.md: 構成要素別の品質スナップショット
+- clean-state-checklist.md: セッション終了時チェックリスト（正本）
 
 ## 使い方
-1. 新しい計画や機能追加時は `skills/grill-me` を活用して解像度を上げる。
-2. 改善は feature_list でスコープを切り、todo_write で追跡。
-3. 検証を必ず行い、progress に記録。
+
+1. 新しい計画や機能追加時は `grill-me` Skill（グローバル登録済み）で解像度を上げる
+2. 改善は feature_list でスコープを切り、検証して evidence を記録する
+3. セッション終了時は clean-state-checklist を実行し、claude-progress.md に記録する
 
 参考: https://walkinglabs.github.io/learn-harness-engineering/en/
-
-## 同期方法
-- リポルートで `./sync-agents.sh` を実行（バックアップ → コピー → diff 検証）。
-- 手動フォールバック: `cp AGENTS.md ~/.grok/AGENTS.md` 後に `head -5` で確認。
-
-初期セットアップ: 2026年時点の .grok/AGENTS.md をベースに、マルチエージェント対応に一般化して開始。
