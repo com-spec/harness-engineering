@@ -1,6 +1,6 @@
 # テンプレートパック（ミニマル）
 
-「Learn Harness Engineering」コースの Resource Library に掲載されているミニマルパックのうち、中核3ファイルを収録している。テンプレート本体はコース掲載内容（英語）のまま。
+「Learn Harness Engineering」コースの Resource Library に掲載されているミニマルパック4ファイルを収録している。テンプレート本体はコース掲載内容（英語）のまま。
 
 出典: https://walkinglabs.github.io/learn-harness-engineering/en/resources/templates/
 
@@ -21,12 +21,15 @@ status は not_started / in_progress / blocked / passing の4種で、in_progres
 進捗ログ。毎セッションの終わりに書き、新しいセッションは最初にこれを読む。
 「Current Verified State」（起動・検証パス、最優先未完了機能、ブロッカー）がプロジェクト現状の単一情報源で、セッションごとの記録（目標・完了・検証・証拠・コミット・リスク・次の一手）を追記していく。
 
+### init.sh
+
+起動スクリプト。依存インストール → ベースライン検証 → 起動コマンドの表示を1回で行う。
+収録版のコマンドは npm のプレースホルダ（npm install / npm test / npm run dev）なので、自分のプロジェクトのコマンドに書き換えてから使う。`chmod +x init.sh` で実行権限を付けること。
+
 ## 新規プロジェクトへのコピー手順
 
-1. 3ファイルをプロジェクトのルートディレクトリにコピーする（例: `cp templates/AGENTS.md templates/feature_list.json templates/claude-progress.md <プロジェクトルート>/`）
-2. AGENTS.md の Startup Workflow のコマンド・パスを実際のプロジェクトに合わせて書き換え、feature_list.json のサンプル機能を自分の機能一覧に置き換える
+1. 4ファイルをプロジェクトのルートディレクトリにコピーする（例: `cp templates/AGENTS.md templates/feature_list.json templates/claude-progress.md templates/init.sh <プロジェクトルート>/`）
+2. AGENTS.md の Startup Workflow のコマンド・パスと、init.sh の INSTALL/VERIFY/START コマンドを実際のプロジェクトに合わせて書き換え、feature_list.json のサンプル機能を自分の機能一覧に置き換える
 3. claude-progress.md の「Current Verified State」を埋めてから最初のエージェントセッションを開始する
 
-補足: コース側のミニマルパックには init.sh（依存インストール・検証・起動コマンドをまとめた起動スクリプト）も含まれる。必要になったら出典ページから追加する。
-
-注意: templates/AGENTS.md の本文は `./init.sh` と `session-handoff.md` を参照しているが、どちらもこのパックには収録していない。コピー後は該当行を自分のプロジェクトのコマンド・ファイルに読み替えるか、使わない場合は削除すること（放置すると起動経路が最初から壊れる）。
+注意: templates/AGENTS.md の本文が参照する `session-handoff.md` はこのパックに収録していない。コピー後は該当行を自分のファイルに読み替えるか、使わない場合は削除すること（放置すると起動経路が壊れる）。

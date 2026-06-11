@@ -24,6 +24,30 @@ This establishes the basic manual method. Script sync-agents.sh now available in
 
 ## Session Log
 
+### Session 004 (2026-06-11)
+
+- Date: 2026-06-11
+- Goal: レビューで将来検討としていたC項目2件の解消（ユーザー依頼「未対応項目を進めていきましょう」）。
+- Completed:
+  - 07講・08講の `active` 初出箇所に訳注を追加（このリポの運用では `in_progress` に相当する旨）
+  - コース公式の init.sh テンプレートを raw URL から取得し templates/init.sh として収録（chmod +x 済み）
+  - templates/README.md を4ファイル構成に更新（init.sh の用途説明とコマンド書き換えの注意を追加、init.sh 未収録の旧記載を削除、session-handoff.md 未収録の注意は維持）
+  - quality-document.md の templates/ 行とベンチマーク表を更新
+- Verification run: bash -n templates/init.sh 成功。grep で訳注2箇所の存在確認。python3 -m json.tool 成功。
+- Evidence captured: feature_list.json の c-items-completion に記録。
+- Commits: 本セッションの修正を1コミットに集約。
+- Known risk or unresolved issue: なし（レビュー指摘はA・B・C全件解消）。
+- Next best step: 次の候補は sync-agents.sh の Claude Code 対応、コース Projects の実践。新規計画時は grill-me を起動する。
+
+#### Clean State Checklist (Session 004)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] sync-agents.sh が実行可能で、正しく同期・検証できる
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
+
 ### Session 003 (2026-06-11)
 
 - Date: 2026-06-11

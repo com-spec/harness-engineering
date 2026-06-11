@@ -186,6 +186,21 @@
       "evidence": [
         "Session 003 (2026-06-11): A1-A6（done→passing統一、quality-document 3箇所更新、括弧2箇所、AGENTS.md Skill委譲整理、Project 06名称統一）と B1-B9（sync-agents.sh 堅牢化、README/AGENTS.md の同期記載明確化、templates注記、status_legend追加、checklist正本明記）を修正。検証コマンド実行済み。"
       ]
+    },
+    {
+      "id": "c-items-completion",
+      "name": "レビューC項目（将来検討）の解消",
+      "status": "passing",
+      "priority": 8,
+      "description": "講義の状態語彙 active への訳注追加（07・08講）と、コース公式 init.sh テンプレートの templates/ への収録。",
+      "verification": [
+        "07講・08講の active 初出箇所に訳注がある",
+        "templates/init.sh が存在し bash -n が成功する",
+        "templates/README.md の記載が4ファイル収録の実態と一致している"
+      ],
+      "evidence": [
+        "Session 004 (2026-06-11): 訳注を2ファイルに追加。init.sh をコース公式 raw URL から取得し chmod +x・bash -n 検証済み。templates/README.md を4ファイル構成に更新（session-handoff.md 未収録の注意は維持）。"
+      ]
     }
   ]
 }

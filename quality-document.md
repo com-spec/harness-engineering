@@ -22,7 +22,7 @@
 | claude-progress.md | A | read（Verified State / Session Log確認） | なし | 2026-06-11 |
 | skills/grill-me | A | SKILL.md read + セッション実践 | なし | 2026-06-11 |
 | docs/harness-course | A | 全13ファイルの存在・日本語化・出典URL確認 | なし（全12講＋ホームを日本語化済み。原文は 1d5c22c で参照可能） | 2026-06-11 |
-| templates/ | A | 存在確認 + JSON妥当性検証 | init.sh テンプレは未収録（必要時に追加） | 2026-06-11 |
+| templates/ | A | 存在確認 + JSON妥当性検証 + bash -n | なし（init.sh 収録済み。session-handoff.md のみ未収録でREADMEに注意記載） | 2026-06-11 |
 
 ## ベンチマークスナップショット
 
@@ -33,6 +33,7 @@
 | 2026-06-10 | 001 | 5 | 0 | 0 |
 | 2026-06-11 | 002 | 6 | 0 | 0 |
 | 2026-06-11 | 003 | 1（review-fixes） | 0 | 0 |
+| 2026-06-11 | 004 | 1（c-items-completion） | 0 | 0 |
 
 ## 簡素化ログ
 
