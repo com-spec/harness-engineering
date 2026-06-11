@@ -245,6 +245,24 @@
         "Session 007 (2026-06-11): ユーザー明示指示により順番待ちから前倒し着手。~/.claude/skills/harness-setup/SKILL.md を作成（グローバル個別管理方針に従いリポにはコピーを置かない）。/tmp の仮プロジェクトでサブエージェントによる実地テストを実行し、最小構成導入が成功（JSON妥当・3ファイル作成・既存上書きなし）。テストで出た改善フィードバック5点をSKILL.mdに反映済み。"
       ],
       "notes": "スキルの本体は ~/.claude/skills/harness-setup/。起動フレーズ:「ハーネス付きで始めて」「ハーネスを導入して」など。"
+    },
+    {
+      "id": "p03-loop-continuity-experiment",
+      "name": "P03をループ持続性実験として最小実践（ハーネス内ループ統合）",
+      "status": "in_progress",
+      "priority": 12,
+      "description": "docs/projects/ に project-03-loops-continuity.md を最小限作成（P01/P02スタイル、1-2セッション規模の小さめ実験）。実験から逆算で後で軽い拡張ノートをdocs/内に1ファイル追加。templates/やコース本編は触らない。",
+      "verification": [
+        "feature_list.json に新featureが追加され status が更新されている",
+        "docs/projects/README.md が更新され P03 が進行中として記載",
+        "project-03-loops-continuity.md が作成され最小限の内容（結論・発見・横断気づき）がある",
+        "python3 -m json.tool feature_list.json が成功"
+      ],
+      "evidence": [
+        "grill-meで統合計画合意後、feature登録・projects/README更新・最小プロジェクトファイル作成を実施。python json.tool成功。",
+        "プロジェクトファイルに実験計画セクションを追加（研究リンクから選択的ポイントのみ、実験適用予定）。Claude Codeメイン使用注記を追記。",
+        "使用ツール欄と最小タスク定義をClaude Codeメインに更新。Grok Build互換明記。"
+      ]
     }
   ]
 }
