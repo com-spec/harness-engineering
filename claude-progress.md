@@ -24,6 +24,28 @@ This establishes the basic manual method. Script sync-agents.sh now available in
 
 ## Session Log
 
+### Session 005 (2026-06-11)
+
+- Date: 2026-06-11
+- Goal: grill-me が Claude Code の Skill として未登録だったギャップの解消（ユーザー質問で発覚 → シンボリックリンク方式で合意）。
+- Completed:
+  - ~/.claude/skills/grill-me → このリポの skills/grill-me へのシンボリックリンクを作成
+  - リポ側を正本としたまま全プロジェクトで Skill 起動が可能に（リポ側の編集が自動反映される。同期作業不要）
+- Verification run: ls -l でリンク先確認、cat で SKILL.md 読取確認、Claude Code の Skill 一覧に grill-me が即時反映されたことを確認。
+- Evidence captured: feature_list.json の grill-me-skill-registration に記録。
+- Commits: 本セッションの記録を1コミットに集約。
+- Known risk or unresolved issue: Grok Build 側で grill-me が起動可能かはこの環境から未確認。リポを移動・リネームするとリンクが切れる点に注意。
+- Next best step: 次の候補は sync-agents.sh の Claude Code 対応、コース Projects の実践。新規計画時は grill-me を起動する（Skill として起動可能になった）。
+
+#### Clean State Checklist (Session 005)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] sync-agents.sh が実行可能で、正しく同期・検証できる
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
+
 ### Session 004 (2026-06-11)
 
 - Date: 2026-06-11
