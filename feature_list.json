@@ -204,16 +204,16 @@
     },
     {
       "id": "grill-me-skill-registration",
-      "name": "grill-me の Claude Code Skill 登録（シンボリックリンク）",
+      "name": "grill-me の Claude Code Skill 登録（通常コピー）",
       "status": "passing",
       "priority": 9,
-      "description": "AGENTS.md で計画ゲートと位置づけている grill-me が Claude Code から Skill として起動できなかったギャップを解消。~/.claude/skills/grill-me からリポの skills/grill-me へシンボリックリンクを作成し、リポ側を正本のまま全プロジェクトで利用可能にする。",
+      "description": "AGENTS.md で計画ゲートと位置づけている grill-me が Claude Code から Skill として起動できなかったギャップを解消。~/.claude/skills/grill-me に他のスキルと同じ通常のフォルダコピーで配置する。リポの skills/grill-me が正本で、変更時は再コピーが必要。",
       "verification": [
-        "~/.claude/skills/grill-me がこのリポの skills/grill-me を指すシンボリックリンクである",
-        "リンク経由で SKILL.md が読める"
+        "~/.claude/skills/grill-me が通常ディレクトリとして存在し SKILL.md が読める",
+        "Claude Code の Skill 一覧に grill-me が表示される"
       ],
       "evidence": [
-        "Session 005 (2026-06-11): ln -s 実行、ls -l でリンク先確認、cat でSKILL.mdの frontmatter 読取確認。直後にClaude CodeのSkill一覧へ grill-me が即時反映されたことを確認（同一セッション内で起動可能）。"
+        "Session 005 (2026-06-11): 最初シンボリックリンクで登録しSkill一覧への即時反映を確認したが、ユーザー要望（わかりやすさ優先）により通常のフォルダコピーに置き換え。ls -l でディレクトリ確認、head で SKILL.md 読取確認。"
       ]
     }
   ]

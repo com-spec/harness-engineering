@@ -27,14 +27,15 @@ This establishes the basic manual method. Script sync-agents.sh now available in
 ### Session 005 (2026-06-11)
 
 - Date: 2026-06-11
-- Goal: grill-me が Claude Code の Skill として未登録だったギャップの解消（ユーザー質問で発覚 → シンボリックリンク方式で合意）。
+- Goal: grill-me が Claude Code の Skill として未登録だったギャップの解消（ユーザー質問で発覚）。
 - Completed:
-  - ~/.claude/skills/grill-me → このリポの skills/grill-me へのシンボリックリンクを作成
-  - リポ側を正本としたまま全プロジェクトで Skill 起動が可能に（リポ側の編集が自動反映される。同期作業不要）
-- Verification run: ls -l でリンク先確認、cat で SKILL.md 読取確認、Claude Code の Skill 一覧に grill-me が即時反映されたことを確認。
+  - 最初シンボリックリンクで登録し、Skill 一覧への即時反映を確認
+  - ユーザー要望（わかりやすさ優先・難しいことをしない）により、他のスキルと同じ通常のフォルダコピーに置き換え（~/.claude/skills/grill-me）
+  - 全プロジェクトで grill-me を Skill として起動可能に
+- Verification run: ls -l で通常ディレクトリであることを確認、head で SKILL.md 読取確認、Skill 一覧への反映確認。
 - Evidence captured: feature_list.json の grill-me-skill-registration に記録。
 - Commits: 本セッションの記録を1コミットに集約。
-- Known risk or unresolved issue: Grok Build 側で grill-me が起動可能かはこの環境から未確認。リポを移動・リネームするとリンクが切れる点に注意。
+- Known risk or unresolved issue: Grok Build 側で grill-me が起動可能かはこの環境から未確認。コピー方式のため、リポ側の skills/grill-me（正本）を変更したら ~/.claude/skills/ へ再コピーが必要（同期忘れに注意。sync-agents.sh への組み込みは将来候補）。
 - Next best step: 次の候補は sync-agents.sh の Claude Code 対応、コース Projects の実践。新規計画時は grill-me を起動する（Skill として起動可能になった）。
 
 #### Clean State Checklist (Session 005)
