@@ -17,11 +17,11 @@
 | 構成要素 | Grade | 検証方法 | 既知のギャップ | 最終更新 |
 |---|---|---|---|---|
 | AGENTS.md（正本） | A | read + コーステンプレ突き合わせ + sync-agents.sh diff検証 | なし（不足原則8項目を反映済み。docs/agents-md-gap-analysis.md 参照） | 2026-06-11 |
-| sync-agents.sh | A | 実行（backup+copy+diff） | Claude Code側（CLAUDE.md）の同期は未対応 | 2026-06-11 |
-| feature_list.json | A | python3 -m json.tool + evidence確認 | なし | 2026-06-11 |
+| sync-agents.sh | A | 実行（backup+copy+diff） | Claude Code側（CLAUDE.md）の同期は未対応（README/AGENTS.mdに手動コピーと明記済み）。初回環境対応・バックアップローテーションは Session 003 で追加 | 2026-06-11 |
+| feature_list.json | A | python3 -m json.tool + evidence確認 | なし（規約外status "done" の混入は Session 003 で修正済み。status_legend で再発防止） | 2026-06-11 |
 | claude-progress.md | A | read（Verified State / Session Log確認） | なし | 2026-06-11 |
 | skills/grill-me | A | SKILL.md read + セッション実践 | なし | 2026-06-11 |
-| docs/harness-course | A | 全12講の存在確認 + 出典URL確認 | なし（06,07,09,10,11補完済み） | 2026-06-11 |
+| docs/harness-course | A | 全13ファイルの存在・日本語化・出典URL確認 | なし（全12講＋ホームを日本語化済み。原文は 1d5c22c で参照可能） | 2026-06-11 |
 | templates/ | A | 存在確認 + JSON妥当性検証 | init.sh テンプレは未収録（必要時に追加） | 2026-06-11 |
 
 ## ベンチマークスナップショット
@@ -31,7 +31,8 @@
 | 日付 | セッション | 完了feature数 | 修正リトライ数 | 未解決ブロッカー |
 |---|---|---|---|---|
 | 2026-06-10 | 001 | 5 | 0 | 0 |
-| 2026-06-11 | 002 | 5（予定含む） | 0 | 0 |
+| 2026-06-11 | 002 | 6 | 0 | 0 |
+| 2026-06-11 | 003 | 1（review-fixes） | 0 | 0 |
 
 ## 簡素化ログ
 

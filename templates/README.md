@@ -28,3 +28,5 @@ status は not_started / in_progress / blocked / passing の4種で、in_progres
 3. claude-progress.md の「Current Verified State」を埋めてから最初のエージェントセッションを開始する
 
 補足: コース側のミニマルパックには init.sh（依存インストール・検証・起動コマンドをまとめた起動スクリプト）も含まれる。必要になったら出典ページから追加する。
+
+注意: templates/AGENTS.md の本文は `./init.sh` と `session-handoff.md` を参照しているが、どちらもこのパックには収録していない。コピー後は該当行を自分のプロジェクトのコマンド・ファイルに読み替えるか、使わない場合は削除すること（放置すると起動経路が最初から壊れる）。

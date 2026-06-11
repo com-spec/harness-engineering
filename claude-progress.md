@@ -24,6 +24,29 @@ This establishes the basic manual method. Script sync-agents.sh now available in
 
 ## Session Log
 
+### Session 003 (2026-06-11)
+
+- Date: 2026-06-11
+- Goal: Session 002 成果物の全体レビューと指摘事項の修正（ユーザー依頼「修正するべき箇所や改善点」→ A＋B 全部修正で合意）。
+- Completed:
+  - サブエージェントによる全体レビュー実施（翻訳忠実性スポットチェック3件・リポ整合性・スクリプト堅牢性・文書スタイル）。翻訳品質は問題なし（論旨・数値の欠落や誤訳ゼロ）
+  - A: 誤り6件を修正 — feature_list の規約外 status "done" を passing に統一（verification/evidence 追記）、quality-document の古い記載3箇所更新、括弧不揃い2箇所（01講・12講）、AGENTS.md Skill委譲の実在しないスキル整理（grill-me 追加・エージェント別注記）、Project 06 名称をサイト正式名に統一
+  - B: 改善9件を実施 — sync-agents.sh 堅牢化（リポルート基準化・初回環境対応・バックアップ3世代ローテーション）、README/AGENTS.md の同期方法を「Grok=スクリプト / Claude Code=手動」と明確化、README の templates 説明を実体に一致、templates/README.md に init.sh・session-handoff.md 未収録の注意追加、feature_list に status_legend と rules を追加、AGENTS.md の checklist 参照を明示文に変更
+- Verification run: python3 -m json.tool 成功。./sync-agents.sh 実行成功（バックアップ2世代、ローテーション機能確認）。grep で規約外 status の残存ゼロ・括弧不揃いの残存ゼロ（eval() への誤検知1件のみ）を確認。
+- Evidence captured: feature_list.json の review-fixes に記録。quality-document.md の各行を最新化。
+- Commits: 本セッションの修正を1コミットに集約（ユーザー承認済みの feature ごとコミット運用）。
+- Known risk or unresolved issue: C項目3件（checklist二重管理への正本注記は対応済み、講義の状態語彙 active への訳注、init.sh テンプレ収録）は将来検討として未対応。
+- Next best step: 全 feature passing。次の候補: sync-agents.sh の Claude Code 対応、templates/ への init.sh 追加、コース Projects の実践。
+
+#### Clean State Checklist (Session 003)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] sync-agents.sh が実行可能で、正しく同期・検証できる（本セッションで実行・diff 一致）
+- [x] feature_list.json の状態が最新で、evidence が揃っている（status_legend 準拠）
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
+
 ### Session 002 (2026-06-11)
 
 - Date: 2026-06-11

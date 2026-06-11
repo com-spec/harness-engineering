@@ -9,15 +9,15 @@
 
 ## 現在のライブハーネスとの関係
 - このリポジトリの `AGENTS.md` が canonical（正本）。
-- 実運用では以下に同期して使用（`sync-agents.sh` で同期）:
-  - Grok Build: `~/.grok/AGENTS.md`
-  - Claude Code: `~/.claude/CLAUDE.md` またはプロジェクト内の CLAUDE.md
+- 実運用では以下に同期して使用:
+  - Grok Build: `~/.grok/AGENTS.md`（`sync-agents.sh` で同期）
+  - Claude Code: `~/.claude/CLAUDE.md` またはプロジェクト内の CLAUDE.md（手動コピー。sync-agents.sh は未対応）
 - 変更時はこのリポで編集 → 該当エージェントの設定場所に反映。
 
 ## 構造
 - AGENTS.md: マルチエージェント対応ハーネス指示の正本（Grok Build / Claude Code 共通で使用）
 - skills/: カスタムスキル（grill-me など計画検証用、複数のエージェントで共有）
-- templates/: 再利用テンプレート（feature_list, progress, agent-specific rules など）
+- templates/: コース準拠のミニマルパック（AGENTS.md / feature_list.json / claude-progress.md ＋日本語README）
 - docs/: ハーネス改善の学び・実験記録
 - feature_list.json / claude-progress.md: このリポ自身の改善タスク管理（コース準拠）
 - sync-agents.sh: AGENTS.md をライブハーネスへ同期するスクリプト（backup + copy + verify）

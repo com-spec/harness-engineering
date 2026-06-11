@@ -1,10 +1,26 @@
 {
+  "status_legend": {
+    "not_started": "未着手",
+    "in_progress": "作業中（常に1件のみ）",
+    "blocked": "ブロック中（理由を notes か evidence に記録）",
+    "passing": "検証実行済み・evidence 記録済みの完了"
+  },
+  "rules": [
+    "status は status_legend の4値のみ使用する",
+    "passing にするには検証の実行と evidence の記録が必須"
+  ],
   "features": [
     {
       "id": "harness-repo-setup",
       "name": "harness-engineering リポジトリ初期構築",
-      "status": "done",
-      "description": "専用リポ作成、AGENTS.md シード、grill-me スキル配置、README 記載"
+      "status": "passing",
+      "description": "専用リポ作成、AGENTS.md シード、grill-me スキル配置、README 記載",
+      "verification": [
+        "リポルートに AGENTS.md / README.md / skills/grill-me が存在する"
+      ],
+      "evidence": [
+        "Session 001 (2026-06-10) で初期構築完了。Session 003 (2026-06-11) のレビューで status を規約準拠の passing に統一し、verification/evidence を追記。"
+      ]
     },
     {
       "id": "grill-me-integration",
@@ -154,6 +170,21 @@
       ],
       "evidence": [
         "Session 002 (2026-06-11): 8ファイルを情報を落とさない詳細日本語版に書き換え（専門用語に初出補足付き）。head で日本語見出し、grep で出典URL記載を全8件確認。原文は初回コミット 1d5c22c で参照可能。"
+      ]
+    },
+    {
+      "id": "review-fixes",
+      "name": "全体レビュー指摘の修正（A: 誤り6件 + B: 改善9件）",
+      "status": "passing",
+      "priority": 7,
+      "description": "サブエージェントによる全体レビューで検出した誤り・矛盾（status規約違反、quality-document の古い記載、括弧不揃い、AGENTS.md の実在しないスキル列挙等）と改善点（sync-agents.sh の初回環境対応・バックアップローテーション、README/templates の記載精度等）を修正する。",
+      "verification": [
+        "python3 -m json.tool feature_list.json が成功する",
+        "./sync-agents.sh が実行成功し、バックアップが3世代以内に保たれる",
+        "grep で規約外 status・半角閉じ括弧の残存がないこと"
+      ],
+      "evidence": [
+        "Session 003 (2026-06-11): A1-A6（done→passing統一、quality-document 3箇所更新、括弧2箇所、AGENTS.md Skill委譲整理、Project 06名称統一）と B1-B9（sync-agents.sh 堅牢化、README/AGENTS.md の同期記載明確化、templates注記、status_legend追加、checklist正本明記）を修正。検証コマンド実行済み。"
       ]
     }
   ]

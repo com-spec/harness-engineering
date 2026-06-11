@@ -1,6 +1,6 @@
 # Lecture 12: なぜすべてのセッションはクリーンな状態を残さなければいけないのか
 
-> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/code/) 実践プロジェクト: [Project 06. Build a Complete Agent Workspace](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/)
+> コード例: [code/](https://github.com/walkinglabs/learn-harness-engineering/blob/main/docs/en/lectures/lecture-12-why-every-session-must-leave-a-clean-state/code/) 実践プロジェクト: [Project 06. Build a Complete Agent Harness](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/)
 
 エージェントが午後いっぱい動き、20ファイルを修正してコミットし、セッションが終わる。次のエージェントセッションが立ち上がると即座に発覚する: ビルドが壊れ、テストは赤、一時的なデバッグファイルが散乱し、feature list は未更新で、進捗はまったく不透明。新セッションの最初の30分は「前セッションが実際に何をしたのかの解明」に丸ごと消える。
 
@@ -154,7 +154,7 @@ npm run test  # クリーンアップで何も壊れていないことを検証
 ## 演習
 
 1. **クリーン状態チェックリスト**: 自分のコードベース向けに5観点をカバーするセッション終了チェックリストを設計する。5セッション連続で適用し、観点ごとの違反件数を記録する
-2. **ベンチマーク比較**: 固定タスクセットを2種のハーネス（クリーン状態要件あり/なし)で実行し、完了率・リトライ回数・欠陥のすり抜け率を比較する
+2. **ベンチマーク比較**: 固定タスクセットを2種のハーネス（クリーン状態要件あり/なし）で実行し、完了率・リトライ回数・欠陥のすり抜け率を比較する
 3. **ハーネス簡素化の実践**: ハーネス部品を1つ選んで一時的に無効化し、ベンチマークタスクを実行する。あり/なしの結果を比較し、維持・除去・置換を判断する
 
 ## 参考文献
