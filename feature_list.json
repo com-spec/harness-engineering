@@ -231,6 +231,18 @@
       "evidence": [
         "Session 006 (2026-06-11): grill-me Skill で3論点すべて合意。git rm で2件削除（履歴から復元可能）、AGENTS.md を約70行のリポ専用ルールに書き換え、README・clean-state-checklist・quality-document（簡素化ログ3件）を更新。検証コマンド実行済み。"
       ]
+    },
+    {
+      "id": "harness-setup-skill",
+      "name": "ハーネスセットアップのSkill化（テンプレコピー＋プロジェクト用記入の自動化）",
+      "status": "not_started",
+      "priority": 11,
+      "description": "templates/ のコピーと3つの記入（feature_listの実タスク化・progressの現在地記入・起動手順の決定）を1回の依頼で行えるSkillまたはスクリプトにする。",
+      "verification": [
+        "新規プロジェクトで実際に使い、コピーから記入完了まで動作すること"
+      ],
+      "evidence": [],
+      "notes": "順番待ち（WIP=1ルール適用）。着手条件: x-monetizationのpost-002が投稿された後、または次の新規プロジェクト立ち上げで実際に必要になったとき。現状は『templatesをコピーしてハーネス付きで始めて』との依頼で代替可能。"
     }
   ]
 }
