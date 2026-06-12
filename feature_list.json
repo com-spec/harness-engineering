@@ -285,6 +285,26 @@
         "フェーズ2: TDD（RED2件→修正→GREEN2/2）でバグ・副因を修正。logger.ts（JSON Lines・ファイル永続化）を起動/import/indexing/IPCエラーに配線、空チャンクwarn追加。check-architecture.sh 10ルール＋docs/ARCHITECTURE.md作成。型エラー14件と重複Window宣言を解消。",
         "検証: npm run check exit0 / npm test 2/2 / npm run check:arch PASS / npm run build成功。solution比較済み（バグ修正は同一、副因はsolution未修正、React禁止ルールを採用）。記録はdocs/projects/project-04-findings.md。"
       ]
+    },
+    {
+      "id": "p05-practice",
+      "name": "コースProject 05（Grounded QA Verification / 役割分離3バリアント比較）の実践",
+      "status": "passing",
+      "priority": 14,
+      "description": "harness-p05-run1にstarter配置、共通ベースライン整備後に3ブランチ（single-role/gen-eval/plan-gen-eval）で同一機能（マルチターン会話履歴）をOpusサブエージェントで実装。コースのルーブリックでfresh採点役が採点し、1.6/3.3/4.9の傾斜が再現するか検証。grill-me合意: 往復上限2回、要求文同一、オーケストレーター非介入。",
+      "verification": [
+        "3ブランチそれぞれで npm run check / test / check:arch の結果が記録されている",
+        "fresh採点役による同一ルーブリックの採点結果が3バリアント分ある",
+        "docs/projects/project-05-findings.md が作成され、projects/README が更新されている",
+        "python3 -m json.tool feature_list.json が成功"
+      ],
+      "evidence": [
+        "Session 009 (2026-06-12): starter配置→共通ベースライン整備（型エラー修正、check/arch PASS確認後コミット96029bb）→3ブランチ作成。",
+        "single-role: c2c2555。check0/12テスト/arch PASS（オーケストレーターが追試）。最終採点3.75。",
+        "gen-eval: 38b6c24→Evaluator指摘5件→ecfd98a修正→確認パスで承認。check0/11テスト/arch PASS追試。最終採点4.50。",
+        "plan-gen-eval: 計画d0af3f9→実装94e77de（逸脱ゼロ）→契約基準で4.75一発承認。check0/11テスト/arch PASS追試。要求基準の最終採点は3.75。",
+        "最終採点はfreshなOpus採点者3名が同一プロンプト・同一ルーブリックで実施。コースの傾斜1.6→3.3→4.9は再現せず（3.75/4.50/3.75）。考察はdocs/projects/project-05-findings.md。"
+      ]
     }
   ]
 }

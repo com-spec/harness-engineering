@@ -5,7 +5,7 @@
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
 - Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 008)
+- Current highest-priority unfinished feature: None (all features passing as of Session 009)
 - Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
 - Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
@@ -24,6 +24,31 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 009 (2026-06-12)
+
+- Date: 2026-06-12（Session 007/008 と同一チャットの続き。ユーザー依頼「続きを実行して」）
+- Goal: コース Project 05（Grounded QA Verification / 役割分離3バリアント比較）の実践。grill-me で4論点合意（3バリアント完走 / コースルーブリック採用＋fresh採点 / 1ディレクトリ+3ブランチ＋ベースライン先行修正 / 情報統制プロトコル: 同一要求文・往復上限2・全役割Opus統一）。
+- Completed:
+  - harness-p05-run1 に starter 配置、共通ベースライン整備（型エラー修正）後に variant/single-role・gen-eval・plan-gen-eval の3ブランチ作成
+  - 機能要求文とルーブリック正本を docs/projects/project-05-materials/ に保存
+  - 3バリアントをOpusサブエージェントで実走（single-role: 自己完結 / gen-eval: 指摘5件→修正→確認承認 / plan-gen-eval: 計画書→逸脱ゼロ実装→契約基準4.75で一発承認）
+  - freshなOpus採点者3名による最終採点: 3.75 / 4.50 / 3.75（コースの傾斜1.6→3.3→4.9は再現せず）
+  - 主発見「評価の正盤の精度が品質上限を決める」を findings と横断的気づきに記録
+  - docs/projects/project-05-findings.md 作成、projects/README 更新（P05完了、横断的気づき3行追加）
+- Verification run: 3ブランチすべてで npm run check exit0 / vitest pass / check-architecture.sh PASS をオーケストレーターが追試。python3 -m json.tool 成功
+- Evidence captured: feature_list.json の p05-practice に記録。詳細は project-05-findings.md
+- Commits: harness-p05-run1 側は各バリアントのブランチにコミット済み（エージェント実施）。harness-engineering 側はセッション終了時にユーザーに確認
+- Known risk or unresolved issue: 採点はバリアントごとにn=1でばらつき未統制（findingsの限界節に明記）。Planner初回が通信エラーで中断→リトライで完走
+- Next best step: コース Project 06（Runtime Observability & Debugging、最終Project）へ。または P03 拡張ノート「ループ×検証精度」（P05の「評価の正盤」発見を統合するとよい）
+
+#### Clean State Checklist (Session 009)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない（harness-p05-run1 は main に戻し済み、3ブランチは保存）
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 008 (2026-06-12)
 
