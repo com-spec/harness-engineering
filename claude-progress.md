@@ -5,7 +5,7 @@
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
 - Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 007)
+- Current highest-priority unfinished feature: None (all features passing as of Session 008)
 - Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
 - Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
@@ -24,6 +24,31 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 008 (2026-06-12)
+
+- Date: 2026-06-12（Session 007 と同一チャットの続き。ユーザー依頼「次のコースに進みましょう」）
+- Goal: コース Project 04（Incremental Indexing / Runtime Feedback & Scope Control）の実践。grill-me で5論点合意（starter使用 / 1ラン2段階方式 / P03 solution比較スキップ＋README名称修正同梱 / 調査は前情報なしサブエージェント委譲 / 着手前コミット）。
+- Completed:
+  - コースリポを sparse clone し projects/project-04/starter を harness-p04-run1 に配置、git初期化（初期状態を1コミット目として保存）
+  - スモーク検証: npm run check 赤14件（P02 starterと同一の出荷時ベースライン）を確認・記録
+  - フェーズ1: 前情報なしサブエージェントが症状のみから6ステップで主因（チャンク空文字化バグ）と副因（index-meta未同期）を特定
+  - フェーズ2: TDD（RED2→GREEN2）でバグ修正、構造化ロガー（logger.ts、ファイル永続化＋空チャンクwarn）、check-architecture.sh（10ルール）＋docs/ARCHITECTURE.md、型エラー14件＋重複Window宣言の解消
+  - solution比較: バグ修正は同一アプローチ、副因はsolution未修正、空チャンク警告はsolutionになし、React禁止ルールをsolutionから採用
+  - docs/projects/project-04-findings.md 作成、projects/README 更新（P04完了、P04-06名称をコース実体に修正、横断的気づき2行追加）
+- Verification run: npm run check exit0 / npm test 2/2 / npm run check:arch PASS / npm run build 成功 / python3 -m json.tool 成功
+- Evidence captured: feature_list.json の p04-practice に記録。詳細は project-04-findings.md。
+- Commits: harness-engineering 側・harness-p04-run1 側ともセッション終了時にユーザーに確認。
+- Known risk or unresolved issue: harness-p04-run1 の実装後コミットは未実行（ユーザー確認待ち）。アプリの目視起動確認（npm run dev）は未実施（build成功までは確認済み）。
+- Next best step: コース Project 05（Grounded QA Verification）へ。または P03 実験から逆算した拡張ノート「ループ×検証精度」の作成。
+
+#### Clean State Checklist (Session 008)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない（p04-run1のコミットのみユーザー確認待ち）
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 007 (2026-06-12)
 

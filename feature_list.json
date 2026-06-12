@@ -265,6 +265,26 @@
         "使用ツール欄と最小タスク定義をClaude Codeメインに更新。Grok Build互換明記。",
         "Session 007 (2026-06-12): ループ実行完了。Iteration 1でEvaluatorがcheck1のFAILと check4の偽PASS（grepが表のP03行に誤ヒット）を検出。Iteration 2で次のステップsection追加・横断気づき追記・check4厳格化後、全項目PASS。記録はproject-03-loops-continuity.mdのループ実行記録セクション。"
       ]
+    },
+    {
+      "id": "p04-practice",
+      "name": "コースProject 04（Incremental Indexing / Runtime Feedback & Scope Control）の実践",
+      "status": "passing",
+      "priority": 13,
+      "description": "コースリポの projects/project-04/starter/ を harness-p04-run1 に配置して実践。フェーズ1: 前情報なしサブエージェントによるバグ調査（ログなし状態の観察）。フェーズ2: 構造化ログ＋アーキテクチャ境界チェック実装（solution非参照）→バグ修正→検証→solutionと読み比べ。findings作成とprojects/README更新（P04-06名称のコース実体合わせを含む）。",
+      "verification": [
+        "harness-p04-run1 に starter が配置され npm install / スモーク検証が通る",
+        "フェーズ1の調査過程（ステップ数・迷走・結論）が記録されている",
+        "フェーズ2実装後に npm run check 等の検証がグリーン",
+        "docs/projects/project-04-findings.md が作成され、projects/README が更新されている",
+        "python3 -m json.tool feature_list.json が成功"
+      ],
+      "evidence": [
+        "Session 008 (2026-06-12): starter取得→harness-p04-run1配置→git初期化。スモーク検証でnpm run check赤14件（P02と同一の出荷時ベースライン）を記録。",
+        "フェーズ1: 前情報なしgeneral-purposeサブエージェントが症状のみから6ステップ・約2分・ツール13回で根本原因（chunkContent空文字バグ）と副因（index-meta未同期）を特定。「空チャンク検出のログがあれば即発見できた」と証言。",
+        "フェーズ2: TDD（RED2件→修正→GREEN2/2）でバグ・副因を修正。logger.ts（JSON Lines・ファイル永続化）を起動/import/indexing/IPCエラーに配線、空チャンクwarn追加。check-architecture.sh 10ルール＋docs/ARCHITECTURE.md作成。型エラー14件と重複Window宣言を解消。",
+        "検証: npm run check exit0 / npm test 2/2 / npm run check:arch PASS / npm run build成功。solution比較済み（バグ修正は同一、副因はsolution未修正、React禁止ルールを採用）。記録はdocs/projects/project-04-findings.md。"
+      ]
     }
   ]
 }
