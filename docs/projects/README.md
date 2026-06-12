@@ -9,7 +9,8 @@
 |---|---|---|---|
 | [Project 01](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-01-baseline-vs-minimal-harness/) | Prompt-Only vs. Rules-First | 完了 | [findings](project-01-findings.md) |
 | [Project 02](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-02-agent-readable-workspace/) | Agent-Readable Workspace | 完了 | [findings](project-02-findings.md) |
-| Project 03 | Multi-Session Continuity（ループ持続性実験） | 進行中 | [findings](project-03-loops-continuity.md) |
+| Project 03 | Multi-Session Continuity（ループ持続性実験） | 完了 | [findings](project-03-loops-continuity.md) |
+| 実プロジェクト例 (Knowledge Base Electron) | Project 02/03 完了（RAGモック基盤） | 完了 | [handoff](handoff-example-knowledge-base-p02-p03.md) |
 | Project 04 | Runtime Feedback & Scope Control | 未着手 | — |
 | Project 05 | Self-Verification & Role Separation | 未着手 | — |
 | Project 06 | Complete Harness (Capstone) | 未着手 | — |
@@ -20,3 +21,4 @@
 
 - P01・P02共通: **Rules系ファイルは有効。State系ファイル（feature_list/progress）は自動検証なしには信頼できない**（Verification Gap）
 - P02固有: **session-handoff.mdによるセッション引き継ぎは成功**——ドキュメントだけで新エージェントが状態・設計判断・次のステップを把握できた
+- P03: **自動検証はループ継続の前提だが、検証条件が緩いと偽PASSが出る**——grepが意図と別の箇所にヒットして未達成をPASSと誤判定した。検証の「精度」も設計対象

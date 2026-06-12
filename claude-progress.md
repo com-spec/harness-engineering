@@ -5,7 +5,7 @@
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
 - Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 006)
+- Current highest-priority unfinished feature: None (all features passing as of Session 007)
 - Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
 - Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
@@ -24,6 +24,31 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 007 (2026-06-12)
+
+- Date: 2026-06-12
+- Goal: p03-loop-continuity-experiment の続き。前セッションで合意済みの計画に基づき、Evaluator-Optimizer風ループを1回実行して記録する。
+- Completed:
+  - Evaluator（自動検証4項目: 次のステップsection grep / json.tool / ファイル存在 / 横断気づき記載）を先に実行し、check1 の FAIL を観測（観測駆動）
+  - check4 の偽PASSを発見: grep が横断的気づき欄ではなく記録一覧表のP03行に誤ヒット。「検証条件が緩いと未達成でもPASSが出る」という新しい発見
+  - Optimizer Action: project-03-loops-continuity.md に「ループ実行記録」と「次のステップ」セクションを追加。docs/projects/README.md の横断的気づきに P03 行を追記。check4 を厳格化（横断的な気づきセクション内の `- P03` 行を要求）
+  - 厳格化後の Evaluator 再実行で全4項目 PASS（FAIL→修正→PASS の閉ループ1サイクル完了）
+  - feature_list.json の p03-loop-continuity-experiment を passing に更新（verification/evidence 追記）。projects/README の P03 を完了に更新
+  - 補足: 前セッション由来の未コミット変更（projects/README の実プロジェクト例行 + handoff-example-knowledge-base-p02-p03.md）をこのセッションの変更と合わせて確認
+- Verification run: python3 -m json.tool 成功。厳格化Evaluator 4項目全PASS。ls docs/harness-course/ templates/ 成功（ベースライン）。
+- Evidence captured: feature_list.json の p03-loop-continuity-experiment に記録。詳細は project-03-loops-continuity.md のループ実行記録セクション。
+- Commits: セッション終了時にユーザーに確認。
+- Known risk or unresolved issue: なし。
+- Next best step: 実験結果から逆算した軽い拡張ノート（docs/内1ファイル、テーマ候補「ループ×検証精度」）を grill-me で計画して新featureとして登録。その後コース Project 04 へ。
+
+#### Clean State Checklist (Session 007)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 006 (2026-06-11)
 
