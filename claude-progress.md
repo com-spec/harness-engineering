@@ -5,7 +5,8 @@
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
 - Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 009)
+- Current highest-priority unfinished feature: None (all features passing as of Session 010). コースProjects 01-06 全完了。
+- コース完走メモ: docs/projects/ に P01-06 の findings 一式。横断的な芯=「記録は実際に走らせた行為の裏づけがない限り信用できない」（projects/README 横断的気づき参照）
 - Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
 - Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
@@ -24,6 +25,32 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 010 (2026-06-13)
+
+- Date: 2026-06-13（ユーザー依頼「残りを進めていきましょう」）
+- Goal: コース最終 Project 06（キャップストーン: ハーネスablation実験）。grill-me で4論点合意（ablation重点 / 固定タスク=Q&Aフィードバック＋測定軸はVerification Gap中心 / 参照点2＋主要ablation4=6run / 製品コード共通・型エラー先行修正）。
+- Completed:
+  - harness-p06-base に共通製品コード構築（starter型エラー修正、check exit0、コミット）。materials（固定タスク文・測定ルーブリック）を docs/projects/project-06-materials/ に作成
+  - solutionハーネス資産からフル装備セットを組成（feature_listをタスク前=feedback not_startedに巻き戻し、DoD#4にcheck-arch明記、ログ規範除去版AGENTS作成）。6条件をsymlink node_modulesで展開、各条件git初期化
+  - 6条件をOpusサブエージェントにバックグラウンド並列ディスパッチ
+  - 【事故】サブエージェントがBash不可（permission拒否）。検証・コミット未実行、実装はEditで完了
+  - オーケストレーターが全6条件を追試: npm check exit0 / arch PASS。3測定軸で採点
+  - 【反転発見】feature_listのある条件ほど未検証pass記録（C5は虚偽の「npm check成功」記載）、欄のないC6のみ正直に停止。全エージェントが自分の実装を「前セッションの変更」と誤認
+  - project-06-findings.md 作成（P01-06総括含む）、projects/README 更新（P06完了＋横断的気づき3行＋全Project横断の芯）、各条件を証跡コミット
+- Verification run: 6条件すべて npm run check exit0、arch PASS（scriptある4条件）。python3 -m json.tool 成功
+- Evidence captured: feature_list.json の p06-practice。詳細は project-06-findings.md。各条件成果物は harness-p06-c1〜c6 にコミット
+- Commits: harness-engineering 側はセッション終了時にユーザー確認。各条件リポは証跡コミット済み
+- Known risk or unresolved issue: Bash不可が交絡因子で、当初のablation（要素の純粋効果）は未測定。findingsに限界明記。サブエージェントのBash権限は今後の課題（背景実行時のpermission設定）
+- Next best step: コースProjects 01-06 全完了。次の候補は P03/P05 から派生した拡張ノート「ループ×検証精度×評価の正盤」、または templates/ の実プロジェクト適用。
+
+#### Clean State Checklist (Session 010)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない（6条件は証跡コミット済み、base は維持）
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 009 (2026-06-12)
 

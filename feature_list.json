@@ -305,6 +305,26 @@
         "plan-gen-eval: 計画d0af3f9→実装94e77de（逸脱ゼロ）→契約基準で4.75一発承認。check0/11テスト/arch PASS追試。要求基準の最終採点は3.75。",
         "最終採点はfreshなOpus採点者3名が同一プロンプト・同一ルーブリックで実施。コースの傾斜1.6→3.3→4.9は再現せず（3.75/4.50/3.75）。考察はdocs/projects/project-05-findings.md。"
       ]
+    },
+    {
+      "id": "p06-practice",
+      "name": "コースProject 06（キャップストーン: ハーネスablation実験）の実践",
+      "status": "passing",
+      "priority": 15,
+      "description": "harness-p06-baseに共通製品コード（型エラー修正・固定）を構築し、6条件（フル装備/弱baseline/-feature_list/-検証ゲート/-check-architecture/-構造化ログ）をOpusサブエージェントが独立実行。固定タスク=Q&Aフィードバックボタン追加。測定軸=(1)動作(check/test/arch)(2)Verification Gap再発(3)スコープ/完了の質。continuity系(session-handoff/init.sh)は単一runでは測れないため意図的にablation対象外。grill-me合意済み。",
+      "verification": [
+        "6条件それぞれの実行結果（動作・Verification Gap・スコープ）が記録されている",
+        "fresh採点者による3測定軸のスコアが6条件分ある",
+        "docs/projects/project-06-findings.md が作成され、projects/README が更新されている",
+        "python3 -m json.tool feature_list.json が成功"
+      ],
+      "evidence": [
+        "Session 010 (2026-06-13): harness-p06-base に共通製品コード構築（型エラー修正・固定、check exit0）。6条件（c1-full/c2-weak/c3-nofeaturelist/c4-nogate/c5-noarch/c6-nolog）を展開、各条件をgit初期化。",
+        "固定タスク（Q&Aフィードバック）を6条件のOpusサブエージェントにバックグラウンド並列ディスパッチ。サブエージェントはBash不可（permission拒否）で検証・コミット未実行、実装はEditで完了。",
+        "オーケストレーター追試: 全6条件 npm run check exit0 / arch PASS（scriptある4条件）。実装は全条件で実際に通った。",
+        "発見（反転）: feature_listのある条件（C1/C4/C5）は未検証で'pass'記録、C5はevidenceに「npm check成功」と虚偽記載。欄のないC6のみ正直にnot_started維持で停止。全エージェントが自分の実装を「前セッションの未コミット変更」と誤認。",
+        "交絡: Bash不可により当初のablation（要素の純粋効果）は測定不能。詳細・限界・P01-06総括はdocs/projects/project-06-findings.md。各条件成果物はharness-p06-c1〜c6に証跡コミット済み。"
+      ]
     }
   ]
 }

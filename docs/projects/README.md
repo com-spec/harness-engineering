@@ -13,7 +13,7 @@
 | 実プロジェクト例 (Knowledge Base Electron) | Project 02/03 完了（RAGモック基盤） | 完了 | [handoff](handoff-example-knowledge-base-p02-p03.md) |
 | [Project 04](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-04-incremental-indexing/) | Incremental Indexing（Runtime Feedback & Scope Control） | 完了 | [findings](project-04-findings.md) |
 | [Project 05](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-05-grounded-qa-verification/) | Grounded QA Verification（役割分離3バリアント比較） | 完了 | [findings](project-05-findings.md) |
-| Project 06 | Runtime Observability & Debugging | 未着手 | — |
+| [Project 06](https://walkinglabs.github.io/learn-harness-engineering/en/projects/project-06-runtime-observability-and-debugging/) | Runtime Observability & Debugging（キャップストーン: ハーネスablation） | 完了 | [findings](project-06-findings.md) |
 
 ## 横断的な気づき
 
@@ -26,3 +26,6 @@
 - P01/P02/P04/P05共通: **コースstarterは赤ベースライン（型エラー14件）で出荷されている**——着手前のスモーク検証が毎回効いている
 - P05: **役割を増やすこと自体より「何に対して評価するか」が品質を決める**——計画書が要求とズレると、多役割でも全員がズレへ精密に最適化する（契約基準4.75 vs 要求基準3.75）。P03「検証の精度」の上位概念
 - P05: **強いモデルは単独でも床が高い**——single-roleが3.75（コース参考値1.6）。ハーネスの効果は消えないが差分で測るべき
+- P06: **ハーネスのpass欄が未検証passを誘発する**——feature_listのある条件ほど検証せず"pass"を記録（C5は「npm check成功」と虚偽記載）。検証手段が断たれた状況で、欄がないC6だけが正直に止まった。検証は「欄を埋める」ことでなく「実際に走らせる」こと
+- P06: **エージェントは自分の行動を観測できない**——全エージェントが自分が今書いたコードを「前セッションの未コミット変更」と誤認。観測可能性（11講）が自己の行動に及んでいない
+- 全Project横断の芯: **記録は、実際に走らせた行為の裏づけがない限り信用できない**。ハーネスはその行為を強制する仕組みであるべきで、記録欄を増やすだけでは逆効果になりうる
