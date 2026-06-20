@@ -4,13 +4,13 @@
 
 - Repository root: harness-engineering (multi-AI agent harness definition repo)
 - Standard startup path: Read claude-progress.md for latest verified state and next step. Read feature_list.json and choose highest-priority unfinished feature. Follow AGENTS.md startup workflow (including grill-me for new plans).
-- Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド).
-- Current highest-priority unfinished feature: None (all features passing as of Session 010). コースProjects 01-06 全完了。
+- Standard verification path: `python3 -m json.tool feature_list.json` + `ls docs/harness-course/ templates/` + clean state checklist (see AGENTS.md 標準検証コマンド). templates-practical 変更時は `python3 -m json.tool templates-practical/feature_list.json` と `bash -n templates-practical/init.sh` も実行する。
+- Current highest-priority unfinished feature: None (all features passing as of Session 013). コースProjects 01-06 全完了。実務用途別の導入ガイドまで追加済み。
 - コース完走メモ: docs/projects/ に P01-06 の findings 一式。横断的な芯=「記録は実際に走らせた行為の裏づけがない限り信用できない」（projects/README 横断的気づき参照）
 - Management policy (changed in Session 006): グローバル共通ルールはこのリポで管理しない。各エージェントの定位置（Claude Code: ~/.claude/CLAUDE.md と ~/.claude/skills/、Grok Build: ~/.grok/AGENTS.md）で個別最適化して管理する。sync-agents.sh と skills/grill-me は削除済み（git履歴から復元可能）
-- Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/）＋実験場（feature_list / claude-progress 運用）
+- Repo roles: 教科書（docs/harness-course）＋テンプレート置き場（templates/ 原典寄り、templates-practical/ 実践版）＋実験場（feature_list / claude-progress 運用）
 - Git: initial commit 1d5c22c created in Session 002; commit-per-feature workflow in effect (user-approved)
-- Quality snapshot: quality-document.md active (all components grade A as of 2026-06-11)
+- Quality snapshot: quality-document.md active (all components grade A as of 2026-06-20)
 - Current blocker: None
 
 ## Sync Procedure (廃止: Session 006 で同期方式自体を廃止。以下は歴史的記録)
@@ -25,6 +25,79 @@ Manual sync steps (per grill-me agreement for sync-mechanism feature):
 This establishes the basic manual method. Script sync-agents.sh now available in root (per this session plan; replaces manual cp).
 
 ## Session Log
+
+### Session 013 (2026-06-20)
+
+- Date: 2026-06-20（ユーザー依頼「いいですね、進めていきましょう」）
+- Goal: 現状の教材・実験記録を、日常業務で使える実践キットへ近づけるため、用途別の導入ガイドを追加する。
+- Completed:
+  - docs/practical-use-cases.md を追加
+  - 記事執筆・情報整理・ドキュメント管理・コーディングの4用途について、何を自動化するか、初期feature例、progress記録、検証方法、禁止事項を整理
+  - README.md の現在地と読む順番に実践ガイドを追加
+  - docs/README.md の読む順番とディレクトリ説明に実践ガイドを追加
+  - feature_list.json に `practical-use-cases` を追加し、検証と evidence を記録
+  - quality-document.md に practical-use-cases の品質スナップショットと Session 013 ベンチマークを反映
+- Verification run: `python3 -m json.tool feature_list.json` exit 0 / `python3 -m json.tool templates-practical/feature_list.json` exit 0 / `bash -n templates-practical/init.sh` exit 0 / `ls docs/harness-course/ templates/ templates-practical/` exit 0 / `rg -n "記事執筆|情報整理|ドキュメント管理|コーディング|practical-use-cases" README.md docs/README.md docs/practical-use-cases.md feature_list.json claude-progress.md quality-document.md` exit 0。
+- Evidence captured: feature_list.json の `practical-use-cases`。
+- Commits: 未実行（ユーザー確認待ち）。
+- Known risk or unresolved issue: 作業開始時点の未コミット変更（Session 011/012相当）を保持したまま上乗せ編集した。
+- Next best step: コミット可否をユーザーに確認。
+
+#### Clean State Checklist (Session 013)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
+
+### Session 012 (2026-06-20)
+
+- Date: 2026-06-20（ユーザー依頼「現在選択するリポジトリの内容を詳細にリファインしてください」）
+- Goal: harness-engineering の入口文書・作業ルール・docs導線・templates-practical説明を、次に読むべき場所と検証方法が分かる形へ詳細リファインする。
+- Completed:
+  - README に「現在地」「読む順番」「標準検証」を追加し、初見時の導線を明確化
+  - AGENTS.md のリポ役割を templates/ と templates-practical/ の実体に合わせ、templates-practical 変更時の検証コマンドを追加
+  - docs/README.md を実用的な目次へ拡張し、Project実践記録と現在の結論へ誘導
+  - templates-practical/README.md でコピー対象4ファイルと説明用READMEを区別
+  - feature_list.json に `repository-content-refinement` を追加し、検証と evidence を記録
+  - quality-document.md に README / docs導線の品質スナップショットと Session 012 ベンチマークを反映
+- Verification run: `python3 -m json.tool feature_list.json` exit 0 / `python3 -m json.tool templates-practical/feature_list.json` exit 0 / `bash -n templates-practical/init.sh` exit 0 / `ls docs/harness-course/ templates/ templates-practical/` exit 0 / `rg -n "テンプレート置き場|標準検証|現在地|読む順番|コピー対象|Current highest-priority" AGENTS.md README.md docs/README.md templates-practical/README.md claude-progress.md` exit 0。
+- Evidence captured: feature_list.json の `repository-content-refinement`。
+- Commits: 未実行（ユーザー確認待ち）。
+- Known risk or unresolved issue: 作業開始時点で Session 011 相当の未コミット変更が既に存在したため、それを保持したまま上乗せ編集した。
+- Next best step: コミット可否をユーザーに確認。
+
+#### Clean State Checklist (Session 012)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
+
+### Session 011 (2026-06-17)
+
+- Date: 2026-06-17（ユーザー依頼「厳選したリポジトリの内容を把握してください」→ 記録漏れ発見後「対応してください」）
+- Goal: 最新コミットで追加済みの `templates-practical/` を、README / feature_list / claude-progress / quality-document の正規台帳に反映する。
+- Completed:
+  - README に `templates-practical/` の位置づけを追記（原典寄り `templates/` と推奨実践版 `templates-practical/` を分離）
+  - feature_list.json に `templates-practical-record` を追加し、実体・検証・evidence を記録
+  - claude-progress.md の Current Verified State を更新し、Session 011 を追記
+  - quality-document.md に `templates-practical/` を追加し、feature_list / progress の記録漏れ解消を反映
+- Verification run: `python3 -m json.tool feature_list.json >/tmp/harness-feature-list.final.json` exit 0 / `python3 -m json.tool templates-practical/feature_list.json >/tmp/harness-templates-practical-feature-list.final.json` exit 0 / `bash -n templates-practical/init.sh` exit 0 / `ls docs/harness-course/ templates/ templates-practical/` exit 0。
+- Evidence captured: feature_list.json の `templates-practical-record`。
+- Commits: 未実行（ユーザー確認待ち）。
+- Known risk or unresolved issue: なし。
+- Next best step: コミット可否をユーザーに確認。
+
+#### Clean State Checklist (Session 011)
+
+- [x] AGENTS.md の Startup Workflow が機能する
+- [x] feature_list.json の状態が最新で、evidence が揃っている
+- [x] claude-progress.md に Current Verified State と Session Log が記録されている
+- [x] スクリプトやログに未完了の半端な状態が残っていない
+- [x] 次セッションが手動介入なしで続けられる
 
 ### Session 010 (2026-06-13)
 

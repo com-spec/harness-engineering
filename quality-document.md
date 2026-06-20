@@ -16,11 +16,15 @@
 
 | 構成要素 | Grade | 検証方法 | 既知のギャップ | 最終更新 |
 |---|---|---|---|---|
-| AGENTS.md（このリポ専用ルール） | A | read + 標準検証コマンド実行 | なし（Session 006 でリポ専用に縮小。グローバルルールは各エージェントの定位置で個別管理） | 2026-06-11 |
-| feature_list.json | A | python3 -m json.tool + evidence確認 | なし（規約外status "done" の混入は Session 003 で修正済み。status_legend で再発防止） | 2026-06-11 |
-| claude-progress.md | A | read（Verified State / Session Log確認） | なし | 2026-06-11 |
+| README.md | A | read + 導線キーワード確認 | なし（現在地・読む順番・標準検証を Session 012 で追記） | 2026-06-20 |
+| AGENTS.md（このリポ専用ルール） | A | read + 標準検証コマンド実行 | なし（templates-practical 変更時の追加検証も記載済み） | 2026-06-20 |
+| feature_list.json | A | python3 -m json.tool + evidence確認 | なし（templates-practical の追加記録漏れは Session 011、入口文書リファイン記録は Session 012 で修正済み） | 2026-06-20 |
+| claude-progress.md | A | read（Verified State / Session Log確認） | なし（Session 012 まで記録済み） | 2026-06-20 |
+| docs/README.md | A | read + 導線キーワード確認 | なし（学習順・実践記録・現在の結論を Session 012 で追記） | 2026-06-20 |
+| docs/practical-use-cases.md | A | read + 用途別キーワード確認 | なし（記事執筆・情報整理・ドキュメント管理・コーディングの4用途を Session 013 で追加） | 2026-06-20 |
 | docs/harness-course | A | 全13ファイルの存在・日本語化・出典URL確認 | なし（全12講＋ホームを日本語化済み。原文は 1d5c22c で参照可能） | 2026-06-11 |
 | templates/ | A | 存在確認 + JSON妥当性検証 + bash -n | なし（init.sh 収録済み。session-handoff.md のみ未収録でREADMEに注意記載） | 2026-06-11 |
+| templates-practical/ | A | JSON妥当性検証 + bash -n + README確認 | なし（コピー対象4ファイルと説明用READMEの区別を Session 012 で明確化） | 2026-06-20 |
 
 ## ベンチマークスナップショット
 
@@ -32,6 +36,9 @@
 | 2026-06-11 | 002 | 6 | 0 | 0 |
 | 2026-06-11 | 003 | 1（review-fixes） | 0 | 0 |
 | 2026-06-11 | 004 | 1（c-items-completion） | 0 | 0 |
+| 2026-06-17 | 011 | 1（templates-practical-record） | 0 | 0 |
+| 2026-06-20 | 012 | 1（repository-content-refinement） | 0 | 0 |
+| 2026-06-20 | 013 | 1（practical-use-cases） | 0 | 0 |
 
 ## 簡素化ログ
 

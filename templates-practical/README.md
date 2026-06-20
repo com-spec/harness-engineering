@@ -28,7 +28,9 @@
 
 ## ファイル構成
 
-原典と同じ4ファイル（AGENTS.md / feature_list.json / claude-progress.md / init.sh）。指示ファイル名・進捗ファイル名の調整方針は原典 `../templates/README.md` と同じ。
+コピー対象は原典と同じ4ファイル（AGENTS.md / feature_list.json / claude-progress.md / init.sh）。この README は使い方の説明で、通常はコピーしない。
+
+指示ファイル名・進捗ファイル名の調整方針は原典 `../templates/README.md` と同じ。
 
 ## コピー手順
 

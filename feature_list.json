@@ -325,6 +325,82 @@
         "発見（反転）: feature_listのある条件（C1/C4/C5）は未検証で'pass'記録、C5はevidenceに「npm check成功」と虚偽記載。欄のないC6のみ正直にnot_started維持で停止。全エージェントが自分の実装を「前セッションの未コミット変更」と誤認。",
         "交絡: Bash不可により当初のablation（要素の純粋効果）は測定不能。詳細・限界・P01-06総括はdocs/projects/project-06-findings.md。各条件成果物はharness-p06-c1〜c6に証跡コミット済み。"
       ]
+    },
+    {
+      "id": "templates-practical-record",
+      "name": "templates-practical 追加内容の正規台帳反映",
+      "status": "passing",
+      "priority": 16,
+      "description": "最新コミットで追加済みだった templates-practical/（Project 01〜06 の学びを織り込んだ実践版テンプレート）を、README / feature_list / claude-progress / quality-document に反映し、次セッションのStartup Workflowで見落とされない状態にする。",
+      "verification": [
+        "README.md に templates/ と templates-practical/ の役割分担が記載されている",
+        "feature_list.json に本featureが passing として記録され、evidence に実行した検証コマンドと結果がある",
+        "claude-progress.md の Current Verified State と Session Log に templates-practical の記録漏れ解消が記載されている",
+        "quality-document.md に templates-practical/ の品質スナップショットが追加されている",
+        "python3 -m json.tool feature_list.json が exit 0",
+        "python3 -m json.tool templates-practical/feature_list.json が exit 0",
+        "bash -n templates-practical/init.sh が exit 0",
+        "ls docs/harness-course/ templates/ templates-practical/ が exit 0"
+      ],
+      "evidence": [
+        "Session 011 (2026-06-17): git log の最新コミット `5f5eee1 テンプレ実践版を新設: Project01-06の学びを織り込み（原典は保存）` に対し、feature_list.json / claude-progress.md 側の記録が欠けていたため、正規台帳へ後追い反映。",
+        "README.md: templates/ は原典寄り、templates-practical/ はProject 01〜06の実践知を反映した推奨テンプレートとして記載済み。",
+        "`python3 -m json.tool feature_list.json >/tmp/harness-feature-list.final.json` を実行。stdoutなし、exit 0。",
+        "`python3 -m json.tool templates-practical/feature_list.json >/tmp/harness-templates-practical-feature-list.final.json` を実行。stdoutなし、exit 0。",
+        "`bash -n templates-practical/init.sh` を実行。stdoutなし、exit 0。",
+        "`ls docs/harness-course/ templates/ templates-practical/` を実行。docs/harness-course は00-home.md〜12-clean-handoff.md、templates/ と templates-practical/ は AGENTS.md / README.md / claude-progress.md / feature_list.json / init.sh を表示、exit 0。"
+      ]
+    },
+    {
+      "id": "repository-content-refinement",
+      "name": "リポジトリ内容の詳細リファイン",
+      "status": "passing",
+      "priority": 17,
+      "description": "現在選択中の harness-engineering リポジトリについて、入口文書・作業ルール・docs導線・templates-practical説明を読み手が迷いにくい形へ整理する。既存の templates-practical 記録反映差分は保持し、その上に最小範囲で追記する。",
+      "verification": [
+        "README.md に現在地・読む順番・標準検証が記載されている",
+        "AGENTS.md のリポ役割と標準検証コマンドが templates-practical/ の存在と一致している",
+        "docs/README.md に harness-course / projects / superpowers/specs の読む順番と現在の結論がある",
+        "templates-practical/README.md がコピー対象4ファイルと README の役割を区別している",
+        "python3 -m json.tool feature_list.json が exit 0",
+        "python3 -m json.tool templates-practical/feature_list.json が exit 0",
+        "bash -n templates-practical/init.sh が exit 0",
+        "ls docs/harness-course/ templates/ templates-practical/ が exit 0"
+      ],
+      "evidence": [
+        "Session 012 (2026-06-20): README.md に現在地、読む順番、標準検証を追加。AGENTS.md のテンプレート役割と templates-practical 変更時の検証コマンドを更新。docs/README.md を薄い概要から実用的な導線へ拡張。templates-practical/README.md で README は説明用、コピー対象は4ファイルと明確化。",
+        "`python3 -m json.tool feature_list.json` を実行。JSON整形出力あり、exit 0。",
+        "`python3 -m json.tool templates-practical/feature_list.json` を実行。JSON整形出力あり、exit 0。",
+        "`bash -n templates-practical/init.sh` を実行。stdoutなし、exit 0。",
+        "`ls docs/harness-course/ templates/ templates-practical/` を実行。3ディレクトリのファイル一覧を表示、exit 0。",
+        "`rg -n \"テンプレート置き場|標準検証|現在地|読む順番|コピー対象|Current highest-priority\" AGENTS.md README.md docs/README.md templates-practical/README.md claude-progress.md` を実行。追加した導線と検証記載の存在を確認、exit 0。"
+      ]
+    },
+    {
+      "id": "practical-use-cases",
+      "name": "用途別の実践導入ガイド追加",
+      "status": "passing",
+      "priority": 18,
+      "description": "教材・実験記録として強い状態から、日常業務で使える実践キットへ近づけるため、記事執筆・情報整理・ドキュメント管理・コーディングの4用途別に、何を自動化するか、初期feature例、progressに残す情報、検証方法、禁止事項をまとめる。",
+      "verification": [
+        "docs/practical-use-cases.md が存在し、4用途（記事執筆・情報整理・ドキュメント管理・コーディング）を含む",
+        "各用途に feature_list.json 初期例、claude-progress.md に残すこと、検証方法、やってはいけないことがある",
+        "README.md の読む順番から docs/practical-use-cases.md に辿れる",
+        "docs/README.md の読む順番とディレクトリ説明から docs/practical-use-cases.md に辿れる",
+        "python3 -m json.tool feature_list.json が exit 0",
+        "python3 -m json.tool templates-practical/feature_list.json が exit 0",
+        "bash -n templates-practical/init.sh が exit 0",
+        "ls docs/harness-course/ templates/ templates-practical/ が exit 0"
+      ],
+      "evidence": [
+        "Session 013 (2026-06-20): docs/practical-use-cases.md を追加。記事執筆・情報整理・ドキュメント管理・コーディングの4用途について、用途、コピーするテンプレート、feature_list.json初期例、claude-progress.mdに残すこと、検証方法、禁止事項、最小導入手順を記載。",
+        "README.md の現在地と読む順番に docs/practical-use-cases.md を追加。docs/README.md の読む順番とディレクトリ説明にも同ファイルを追加。",
+        "`python3 -m json.tool feature_list.json` を実行。JSON整形出力あり、exit 0。",
+        "`python3 -m json.tool templates-practical/feature_list.json` を実行。JSON整形出力あり、exit 0。",
+        "`bash -n templates-practical/init.sh` を実行。stdoutなし、exit 0。",
+        "`ls docs/harness-course/ templates/ templates-practical/` を実行。3ディレクトリのファイル一覧を表示、exit 0。",
+        "`rg -n \"記事執筆|情報整理|ドキュメント管理|コーディング|practical-use-cases\" README.md docs/README.md docs/practical-use-cases.md feature_list.json claude-progress.md quality-document.md` を実行し、用途別導線と記録の存在を確認、exit 0。"
+      ]
     }
   ]
 }

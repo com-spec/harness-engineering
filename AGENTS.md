@@ -3,15 +3,12 @@
 このファイルは、このリポジトリで作業するときのルールである。
 
 全プロジェクト共通のルール（応答スタイル・禁止事項・委譲方針など）は、ここでは管理しない。
-各エージェントの定位置で個別に管理する（2026-06-11 の方針転換。経緯は claude-progress.md Session 006 を参照）:
-
-- Claude Code: `~/.claude/CLAUDE.md`
-- Grok Build: `~/.grok/AGENTS.md`
+各エージェントの定位置で個別に管理する（2026-06-11 の方針転換。経緯は claude-progress.md Session 006 を参照）。
 
 ## このリポの役割
 
 1. **教科書**: docs/harness-course/（Learn Harness Engineering 全12講の日本語版）
-2. **テンプレート置き場**: templates/（新規プロジェクトにコピーするミニマルパック）
+2. **テンプレート置き場**: templates/（コース原典寄り）と templates-practical/（実践版）
 3. **実験場**: このリポ自体を feature_list / claude-progress で運用し、ハーネスの練習台にする
 
 ## 計画ゲート
@@ -43,6 +40,9 @@
 
 - `python3 -m json.tool feature_list.json`（feature_list の構文検証）
 - `ls docs/harness-course/ templates/`（ドキュメント・テンプレートの存在確認）
+- templates-practical/ を変更した場合:
+  - `python3 -m json.tool templates-practical/feature_list.json`
+  - `bash -n templates-practical/init.sh`
 
 ## Startup Workflow
 
